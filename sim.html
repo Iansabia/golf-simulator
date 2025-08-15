@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Stakes Golf Co. Wagering System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            --brand-purple: #6f42c1;
+            --brand-purple-hover: #5a37a0;
+            --brand-tan: #D2B48C;
+            --brand-dark-gold: #7e6649;
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--brand-purple);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider-thumb::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--brand-purple);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .hole-btn.active {
+            background-color: var(--brand-purple);
+            color: white;
+            border-color: var(--brand-purple);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-6xl bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 space-y-3">
+        
+        <header class="text-center">
+            <h1 class="text-2xl font-bold text-[#6f42c1]">High Stakes Golf Co. Wagering System</h1>
+            <p class="text-gray-500 text-xs mt-1">Rayleigh Distribution Payouts with Kalman Filter-Based RTP Calibration</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid md:grid-cols-2 gap-4">
+            
+            <!-- Left Column: Controls & Charts -->
+            <div class="bg-white border border-gray-200 rounded-xl p-3 space-y-3">
+                
+                <div>
+                    <label for="handicap" class="block text-sm font-medium text-gray-700 mb-1">
+                        Starting Handicap: <span id="handicapValue" class="font-bold text-[#6f42c1]">15</span>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Dispersion: 
+                            Current: <span id="dispersionValue" class="font-bold text-gray-900"></span> |
+                            Original: <span id="originalDispersionValue" class="font-bold text-gray-400"></span>
+                        </div>
+                    </label>
+                    <input type="range" id="handicap" min="0" max="30" value="15" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                </div>
+
+                <div>
+                    <label for="wager" class="block text-sm font-medium text-gray-700 mb-1">Wager Amount ($)</label>
+                    <input type="number" id="wager" value="5" min="1" class="w-full bg-white border border-gray-300 rounded-lg p-1.5 text-sm text-gray-900 focus:ring-[#6f42c1] focus:border-[#6f42c1]">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Target Hole</label>
+                    <div id="hole-selection" class="grid grid-cols-4 gap-2">
+                        <!-- Hole buttons will be injected here by JS -->
+                    </div>
+                </div>
+                
+                <!-- Payout Curve Chart -->
+                <div class="pt-1">
+                     <h2 class="text-base font-semibold text-center mb-1">Personalized Payout Curve</h2>
+                     <div class="relative h-40">
+                        <canvas id="payout-chart"></canvas>
+                     </div>
+                </div>
+
+                <!-- P_max History Chart -->
+                <div class="pt-1">
+                     <h2 class="text-base font-semibold text-center mb-1">P_max History</h2>
+                     <div class="relative h-40">
+                        <canvas id="pmax-history-chart"></canvas>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Simulation & History -->
+            <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between space-y-3">
+                <div class="flex-grow flex flex-col">
+                    <button id="hit-ball-btn" class="w-full bg-[#6f42c1] hover:bg-[#5a37a0] text-white font-bold py-2 px-4 rounded-lg transition duration-300 text-base shadow-lg">
+                        Hit Ball & Simulate
+                    </button>
+                    <div class="text-center mt-3 flex-grow flex flex-col justify-center">
+                        <h2 class="text-base font-semibold">Shot Outcome <span id="shot-batch-status" class="text-xs text-gray-500 font-normal"></span></h2>
+                        <div class="w-full aspect-square max-w-[240px] mx-auto bg-gray-100 rounded-full flex items-center justify-center relative my-1">
+                            <canvas id="shot-visualizer" width="240" height="240"></canvas>
+                        </div>
+                        <div id="results" class="w-full space-y-1 pt-1 text-sm">
+                            <p class="text-gray-500">Set your handicap, wager, and select a hole to begin.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Session Tracker -->
+                <div class="w-full pt-2 mt-2 border-t border-gray-200 space-y-1">
+                    <h2 class="text-base font-semibold text-center">Session Tracker</h2>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Money Wagered:</span>
+                        <span id="totalWagered" class="font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Money Won:</span>
+                        <span id="totalWon" class="font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold">
+                        <span class="text-gray-800">Net Gain/Loss:</span>
+                        <span id="netTotal" class="font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex space-x-2 mt-2">
+                        <button id="reset-skill-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 text-xs">Reset Skill Model</button>
+                        <button id="reset-session-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 text-xs">Reset Session</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & CONFIGURATION ---
+        const holeData = [
+            { id: 1, dist: 75, d_max: 17.95, RTP: 0.86, k: 5.5 },
+            { id: 2, dist: 100, d_max: 25.69, RTP: 0.86, k: 5.5 },
+            { id: 3, dist: 125, d_max: 36.71, RTP: 0.88, k: 5.5 },
+            { id: 4, dist: 150, d_max: 47.58, RTP: 0.88, k: 6.0 },
+            { id: 5, dist: 175, d_max: 59.09, RTP: 0.88, k: 6.0 },
+            { id: 6, dist: 200, d_max: 73.58, RTP: 0.90, k: 6.5 },
+            { id: 7, dist: 225, d_max: 84.84, RTP: 0.90, k: 6.5 },
+            { id: 8, dist: 250, d_max: 101.14, RTP: 0.90, k: 6.5 },
+        ];
+        
+        // --- STATE MANAGEMENT ---
+        let playerState = {
+            kalmanFilters: {}
+        };
+        let selectedHoleId = 4;
+        let payoutChartInstance = null;
+        let pmaxHistoryChartInstance = null;
+        let lastShotData = null;
+        let totalWagered = 0;
+        let totalWon = 0;
+        const brandPurple = '#6f42c1';
+        const brandTan = '#D2B48C';
+        const brandLavender = '#9e8cb4';
+        const brandRoseCopper = '#ac7c6c';
+        const brandMutedBrown = '#947c69';
+        const brandDarkGold = '#7e6649';
+        const darkTextColor = '#374151'; // gray-700
+
+        // --- DOM ELEMENTS ---
+        const handicapSlider = document.getElementById('handicap');
+        const handicapValue = document.getElementById('handicapValue');
+        const dispersionValue = document.getElementById('dispersionValue');
+        const originalDispersionValue = document.getElementById('originalDispersionValue');
+        const wagerInput = document.getElementById('wager');
+        const hitBallBtn = document.getElementById('hit-ball-btn');
+        const resultsDiv = document.getElementById('results');
+        const holeSelectionDiv = document.getElementById('hole-selection');
+        const shotCanvas = document.getElementById('shot-visualizer');
+        const shotCtx = shotCanvas.getContext('2d');
+        const chartCanvas = document.getElementById('payout-chart');
+        const pmaxHistoryCanvas = document.getElementById('pmax-history-chart');
+        const totalWageredEl = document.getElementById('totalWagered');
+        const totalWonEl = document.getElementById('totalWon');
+        const netTotalEl = document.getElementById('netTotal');
+        const resetSkillBtn = document.getElementById('reset-skill-btn');
+        const resetSessionBtn = document.getElementById('reset-session-btn');
+        const shotBatchStatusEl = document.getElementById('shot-batch-status');
+
+
+        // --- CORE MATH & ML FUNCTIONS ---
+        function calculateInitialDispersion(handicap, distanceYds) {
+            const baselineAlpha = 0.05 + ((distanceYds - 75) / (250 - 75)) * 0.01;
+            const handicapModifier = 0.5 + (handicap / 30);
+            const finalAlpha = baselineAlpha * handicapModifier;
+            return distanceYds * 3 * finalAlpha;
+        }
+        
+        function kalmanUpdate(prior, measurement) {
+            const processNoise = 0.1; 
+            const measurementNoise = 500.0;
+            const learningRateScale = 0.15;
+            const learningRate = learningRateScale * Math.log10(prior.cumulativeWager + 1);
+            const predictedEstimate = prior.estimate;
+            const predictedErrorCovariance = prior.errorCovariance + processNoise;
+            let kalmanGain = predictedErrorCovariance / (predictedErrorCovariance + measurementNoise);
+            kalmanGain *= Math.min(learningRate, 1.0);
+            const posteriorEstimate = predictedEstimate + kalmanGain * (measurement - predictedEstimate);
+            const posteriorErrorCovariance = (1 - kalmanGain) * predictedErrorCovariance;
+
+            return { 
+                estimate: posteriorEstimate, 
+                errorCovariance: posteriorErrorCovariance,
+            };
+        }
+
+        function resetSkillModel() {
+            const handicap = parseInt(handicapSlider.value);
+            holeData.forEach(hole => {
+                const initialDispersion = calculateInitialDispersion(handicap, hole.dist);
+                playerState.kalmanFilters[hole.id] = {
+                    initialEstimate: initialDispersion,
+                    estimate: initialDispersion,
+                    errorCovariance: 1000,
+                    cumulativeWager: 0,
+                    p_max_history: [],
+                    shot_batch: [],
+                };
+            });
+            lastShotData = null;
+            updateUIDisplay();
+            updatePayoutChart();
+            updatePmaxHistoryChart();
+        }
+
+        function numericalIntegrate(func, a, b, n) {
+            const step = (b - a) / n;
+            let sum = (func(a) + func(b)) / 2.0;
+            for (let i = 1; i < n; i++) {
+                sum += func(a + i * step);
+            }
+            return sum * step;
+        }
+
+        function calculatePmax(s, hole) {
+            const { d_max, k, RTP } = hole;
+            const integrand = (d) => {
+                if (d <= 0 || d > d_max) return 0;
+                const payoutPart = Math.pow(1 - d / d_max, k);
+                const pdf = (d / (s * s)) * Math.exp(-(d * d) / (2 * s * s));
+                return payoutPart * pdf;
+            };
+            const integralResult = numericalIntegrate(integrand, 0, d_max, 1000);
+            return integralResult === 0 ? 100 : RTP / integralResult;
+        }
+
+        function randomNormal(stdDev) {
+            let u1 = 0, u2 = 0;
+            while (u1 === 0) u1 = Math.random();
+            while (u2 === 0) u2 = Math.random();
+            const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return z0 * stdDev;
+        }
+
+        function simulateShot(s) {
+            const x = randomNormal(s);
+            const y = randomNormal(s);
+            return Math.sqrt(x * x + y * y);
+        }
+
+        // --- UI & VISUALIZATION ---
+        function updateUIDisplay() {
+            const handicap = parseInt(handicapSlider.value);
+            const holeState = playerState.kalmanFilters[selectedHoleId];
+            const currentDispersion = holeState.estimate;
+            const originalDispersion = holeState.initialEstimate;
+            
+            handicapValue.textContent = handicap;
+            dispersionValue.textContent = `${currentDispersion.toFixed(1)} ft`;
+            originalDispersionValue.textContent = `${originalDispersion.toFixed(1)} ft`;
+            shotBatchStatusEl.textContent = `(Shot ${holeState.shot_batch.length + 1} of 5)`;
+        }
+        
+        function updateTrackerUI() {
+            totalWageredEl.textContent = `$${totalWagered.toFixed(2)}`;
+            totalWonEl.textContent = `$${totalWon.toFixed(2)}`;
+            const net = totalWon - totalWagered;
+            netTotalEl.textContent = `${net < 0 ? '-' : ''}$${Math.abs(net).toFixed(2)}`;
+            if (net > 0) {
+                netTotalEl.className = 'font-semibold text-[#6f42c1]';
+            } else if (net < 0) {
+                netTotalEl.className = 'font-semibold text-red-600';
+            } else {
+                netTotalEl.className = 'font-semibold text-gray-900';
+            }
+        }
+
+        function drawTarget(d_max) {
+            const center = shotCanvas.width / 2;
+            shotCtx.clearRect(0, 0, shotCanvas.width, shotCanvas.height);
+            
+            for(let i = 1; i <= 4; i++) {
+                shotCtx.beginPath();
+                shotCtx.arc(center, center, (center * 0.95) * (i/4), 0, 2 * Math.PI);
+                shotCtx.strokeStyle = `rgba(111, 66, 193, 0.7)`;
+                shotCtx.lineWidth = 1;
+                shotCtx.stroke();
+            }
+            shotCtx.beginPath();
+            shotCtx.arc(center, center, 3, 0, 2 * Math.PI);
+            shotCtx.fillStyle = brandPurple;
+            shotCtx.fill();
+        }
+
+        function drawShot(missDistance, d_max) {
+            const center = shotCanvas.width / 2;
+            const maxRadius = center * 0.95;
+            const radius = (missDistance / d_max) * maxRadius;
+            const angle = Math.random() * 2 * Math.PI;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            shotCtx.beginPath();
+            shotCtx.arc(x, y, 5, 0, 2 * Math.PI);
+            shotCtx.fillStyle = '#374151'; // Dark gray for shot
+            shotCtx.fill();
+            shotCtx.strokeStyle = 'white';
+            shotCtx.lineWidth = 1.5;
+            shotCtx.stroke();
+        }
+
+        function initPayoutChart() {
+            const ctx = chartCanvas.getContext('2d');
+            payoutChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Payout Multiplier', data: [], borderColor: brandPurple, backgroundColor: 'rgba(111, 66, 193, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }, { label: 'Last Shot', data: [], backgroundColor: '#374151', borderColor: 'white', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (tooltipItems) => `Miss: ${tooltipItems[0].label}`, label: (tooltipItem) => `Multiplier: ${tooltipItem.raw.toFixed(2)}x` } } }, scales: { x: { title: { display: true, text: 'Miss Distance (ft)', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } } }, y: { title: { display: true, text: 'Multiplier (x)', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } }, beginAtZero: true } } }
+            });
+        }
+        
+        function initPmaxHistoryChart() {
+            const ctx = pmaxHistoryCanvas.getContext('2d');
+            pmaxHistoryChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'P_max', data: [], borderColor: brandDarkGold, backgroundColor: 'rgba(126, 102, 73, 0.1)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: brandDarkGold }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Update Number', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } } }, y: { title: { display: true, text: 'P_max (x)', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } }, beginAtZero: false } } }
+            });
+        }
+
+        function updatePayoutChart() {
+            const hole = holeData.find(h => h.id === selectedHoleId);
+            const s = playerState.kalmanFilters[selectedHoleId].estimate;
+            const p_max = calculatePmax(s, hole);
+            const labels = [];
+            const curveData = [];
+            const steps = 50;
+            for (let i = 0; i <= steps; i++) {
+                const d = (i / steps) * hole.d_max;
+                labels.push(d.toFixed(1));
+                const multiplier = p_max * Math.pow(1 - d / hole.d_max, hole.k);
+                curveData.push(multiplier);
+            }
+            const shotMarkerData = new Array(steps + 1).fill(null);
+            if(lastShotData) {
+                let closestIndex = 0;
+                let minDiff = Infinity;
+                labels.forEach((label, index) => {
+                    const diff = Math.abs(parseFloat(label) - lastShotData.missDistance);
+                    if (diff < minDiff) { minDiff = diff; closestIndex = index; }
+                });
+                shotMarkerData[closestIndex] = lastShotData.multiplier;
+            }
+            const displayLabels = labels.map(l => `${l} ft`);
+            payoutChartInstance.data.labels = displayLabels;
+            payoutChartInstance.data.datasets[0].data = curveData;
+            payoutChartInstance.data.datasets[1].data = shotMarkerData;
+            payoutChartInstance.options.scales.y.max = Math.ceil(p_max / 5) * 5;
+            payoutChartInstance.update();
+        }
+        
+        function updatePmaxHistoryChart() {
+            const history = playerState.kalmanFilters[selectedHoleId].p_max_history;
+            pmaxHistoryChartInstance.data.labels = history.map((_, i) => `Update ${i + 1}`);
+            pmaxHistoryChartInstance.data.datasets[0].data = history;
+            pmaxHistoryChartInstance.update();
+        }
+
+        // --- EVENT HANDLERS & INITIALIZATION ---
+        function handleSimulation() {
+            const wager = parseFloat(wagerInput.value);
+            const hole = holeData.find(h => h.id === selectedHoleId);
+            if (isNaN(wager) || wager <= 0) {
+                resultsDiv.innerHTML = `<p class="text-red-500 font-semibold">Please enter a valid wager.</p>`;
+                return;
+            }
+
+            const holeState = playerState.kalmanFilters[selectedHoleId];
+            const s = holeState.estimate;
+            const p_max = calculatePmax(s, hole);
+            const missDistance = simulateShot(s);
+            let payout = 0;
+            let multiplier = 0;
+            if (missDistance <= hole.d_max) {
+                multiplier = p_max * Math.pow(1 - missDistance / hole.d_max, hole.k);
+                payout = wager * multiplier;
+            }
+            lastShotData = { missDistance, multiplier };
+            totalWagered += wager;
+            totalWon += payout;
+
+            // Add shot to batch
+            holeState.shot_batch.push(missDistance);
+            holeState.cumulativeWager += wager;
+            
+            let updateMessage = "";
+
+            // Check if batch is complete
+            if (holeState.shot_batch.length >= 5) {
+                const averageMiss = holeState.shot_batch.reduce((a, b) => a + b, 0) / holeState.shot_batch.length;
+                const unbiasedMeasurement = averageMiss / Math.sqrt(Math.PI / 2);
+
+                const updatedKalmanState = kalmanUpdate(holeState, unbiasedMeasurement);
+                holeState.estimate = updatedKalmanState.estimate;
+                holeState.errorCovariance = updatedKalmanState.errorCovariance;
+                
+                holeState.p_max_history.push(p_max);
+                updateMessage = `<p class="text-xs text-blue-500 mt-1">Skill model updated.</p>`;
+                updatePmaxHistoryChart();
+                
+                holeState.shot_batch = []; // Reset batch
+            }
+
+            updateUIDisplay();
+            updateTrackerUI();
+            resultsDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 text-left text-sm">
+                    <p class="text-gray-600">Miss Distance:</p><p class="font-semibold text-gray-900">${missDistance.toFixed(2)} ft</p>
+                    <p class="text-gray-600">Your P_max:</p><p class="font-semibold text-gray-900">${p_max.toFixed(2)}x</p>
+                    <p class="text-gray-600">Multiplier:</p><p class="font-semibold text-gray-900">${multiplier.toFixed(2)}x</p>
+                </div>
+                <div class="mt-1 pt-1 border-t border-gray-200">
+                    <p class="text-base">Payout: <span class="font-bold text-xl ${payout >= wager ? 'text-[#6f42c1]' : 'text-red-600'}">$${payout.toFixed(2)}</span></p>
+                </div>
+                ${updateMessage}
+            `;
+            drawTarget(hole.d_max);
+            drawShot(missDistance, hole.d_max);
+            updatePayoutChart();
+        }
+
+        function init() {
+            holeData.forEach(hole => {
+                const button = document.createElement('button');
+                button.className = 'hole-btn border border-gray-300 rounded-md p-1.5 text-xs hover:bg-[#5a37a0] hover:text-white transition';
+                button.textContent = `${hole.dist}y`;
+                button.dataset.holeId = hole.id;
+                if (hole.id === selectedHoleId) button.classList.add('active');
+                
+                button.addEventListener('click', () => {
+                    selectedHoleId = hole.id;
+                    lastShotData = null;
+                    document.querySelectorAll('.hole-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const currentHole = holeData.find(h => h.id === selectedHoleId);
+                    drawTarget(currentHole.d_max);
+                    updateUIDisplay();
+                    updatePayoutChart();
+                    updatePmaxHistoryChart();
+                });
+                holeSelectionDiv.appendChild(button);
+            });
+            
+            handicapSlider.addEventListener('input', (e) => {
+                resetSkillModel();
+            });
+            
+            resetSkillBtn.addEventListener('click', resetSkillModel);
+            
+            resetSessionBtn.addEventListener('click', () => {
+                totalWagered = 0;
+                totalWon = 0;
+                updateTrackerUI();
+            });
+
+            hitBallBtn.addEventListener('click', handleSimulation);
+
+            const initialHole = holeData.find(h => h.id === selectedHoleId);
+            drawTarget(initialHole.d_max);
+            initPayoutChart();
+            initPmaxHistoryChart();
+            resetSkillModel();
+            updateTrackerUI();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
