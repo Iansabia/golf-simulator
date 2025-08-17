@@ -126,6 +126,14 @@
                         <span class="text-gray-800">Net Gain/Loss:</span>
                         <span id="netTotal" class="font-semibold">$0.00</span>
                     </div>
+                    <div class="flex justify-between text-sm mt-1 pt-1 border-t border-gray-200/80">
+                        <span class="text-gray-600">Set House Edge (Hole):</span>
+                        <span id="setHouseEdge" class="font-semibold">0.0%</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Current House Edge (Session):</span>
+                        <span id="calculatedHouseEdge" class="font-semibold">0.0%</span>
+                    </div>
                     <div class="flex space-x-2 mt-2">
                         <button id="reset-skill-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 text-xs">Reset Skill Model</button>
                         <button id="reset-session-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 text-xs">Reset Session</button>
@@ -182,6 +190,8 @@
         const totalWageredEl = document.getElementById('totalWagered');
         const totalWonEl = document.getElementById('totalWon');
         const netTotalEl = document.getElementById('netTotal');
+        const setHouseEdgeEl = document.getElementById('setHouseEdge');
+        const calculatedHouseEdgeEl = document.getElementById('calculatedHouseEdge');
         const resetSkillBtn = document.getElementById('reset-skill-btn');
         const resetSessionBtn = document.getElementById('reset-session-btn');
         const shotBatchStatusEl = document.getElementById('shot-batch-status');
@@ -292,6 +302,16 @@
             } else {
                 netTotalEl.className = 'font-semibold text-gray-900';
             }
+
+            const selectedHole = holeData.find(h => h.id === selectedHoleId);
+            const setEdge = (1 - selectedHole.RTP) * 100;
+            setHouseEdgeEl.textContent = `${setEdge.toFixed(1)}%`;
+
+            let calculatedEdge = 0;
+            if (totalWagered > 0) {
+                calculatedEdge = ((totalWagered - totalWon) / totalWagered) * 100;
+            }
+            calculatedHouseEdgeEl.textContent = `${calculatedEdge.toFixed(1)}%`;
         }
 
         function drawTarget(d_max) {
