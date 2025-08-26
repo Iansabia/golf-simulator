@@ -86,8 +86,9 @@
 
         <!-- Page Toggles -->
         <div class="flex justify-center border-b border-gray-700">
-            <button id="player-sim-btn" class="page-toggle-btn active py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Player Simulator</button>
-            <button id="house-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">House Profit Simulator</button>
+            <button id="player-sim-btn" class="page-toggle-btn active py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Continuum™</button>
+            <button id="house-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">House Profit</button>
+            <button id="rake-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Player Vs. Player</button>
         </div>
 
         <!-- Player Simulator Page -->
@@ -292,6 +293,80 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Rake Competition Simulator Page -->
+        <div id="rake-simulator-page" class="hidden">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Left Column: Rake Sim Controls -->
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
+                    <h2 class="text-xl font-bold text-center text-white">Competition Parameters</h2>
+                    
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-4">
+                        <div>
+                            <label for="rakeGameMode" class="block text-sm font-medium text-gray-300 mb-2">Game Mode</label>
+                            <select id="rakeGameMode" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                                <option value="longest_drive">Longest Drive</option>
+                                <option value="closest_to_pin">Closest to the Pin</option>
+                            </select>
+                        </div>
+                        <div id="rake-ctp-hole-container" class="hidden">
+                            <label for="rakeCtpHole" class="block text-sm font-medium text-gray-300 mb-2">Target Hole (CTP)</label>
+                            <select id="rakeCtpHole" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="rakePayoutStructure" class="block text-sm font-medium text-gray-300 mb-2">Payout Structure</label>
+                            <select id="rakePayoutStructure" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                                <option value="winner_takes_all">Winner Takes All</option>
+                                <option value="top_3">Top 3 Paid (60/30/10)</option>
+                                <option value="top_2">Top 2 Paid (70/30)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="rakeEntryFee" class="block text-sm font-medium text-gray-300 mb-2">Entry Fee ($)</label>
+                            <input type="number" id="rakeEntryFee" value="10" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                        <div>
+                            <label for="rakeNumPlayers" class="block text-sm font-medium text-gray-300 mb-2">Number of Players</label>
+                            <input type="number" id="rakeNumPlayers" value="100" min="2" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                        <div>
+                            <label for="rakePercentage" class="block text-sm font-medium text-gray-300 mb-2">House Rake (%)</label>
+                            <input type="number" id="rakePercentage" value="10" min="0" max="100" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <button id="randomize-rake-btn" class="w-1/3 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg" style="background-color: var(--brand-dark-gold);">
+                            Randomize
+                        </button>
+                        <button id="run-rake-sim-btn" class="w-2/3 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
+                            Simulate Competition
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Rake Sim Results -->
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
+                    <div id="rake-results-container" class="hidden">
+                        <h2 class="text-xl font-bold text-center text-white mb-4">Competition Results</h2>
+                        <div id="rake-financial-summary" class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
+                             <!-- Payout info injected by JS -->
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 mt-4">
+                             <h3 class="text-base font-semibold text-center mb-2 text-gray-200">Top 10 Leaderboard</h3>
+                             <div class="relative h-80">
+                                 <canvas id="rake-leaderboard-chart"></canvas>
+                             </div>
+                        </div>
+                    </div>
+                     <div id="rake-initial-message" class="flex items-center justify-center h-full">
+                        <p class="text-gray-500">Set parameters and simulate competition to see results.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -317,6 +392,7 @@
         let pmaxHistoryChartInstance = null;
         let houseProfitChartInstance = null;
         let heatmapChartInstance = null;
+        let rakeLeaderboardChartInstance = null;
         let lastShotData = null;
         let totalWagered = 0;
         let totalWon = 0;
@@ -329,8 +405,10 @@
         // --- DOM ELEMENTS ---
         const playerSimPage = document.getElementById('player-simulator-page');
         const houseSimPage = document.getElementById('house-simulator-page');
+        const rakeSimPage = document.getElementById('rake-simulator-page');
         const playerSimBtn = document.getElementById('player-sim-btn');
         const houseSimBtn = document.getElementById('house-sim-btn');
+        const rakeSimBtn = document.getElementById('rake-sim-btn');
 
         // Player Sim Elements
         const handicapSlider = document.getElementById('handicap');
@@ -376,6 +454,21 @@
         const progressBar = document.getElementById('progress-bar');
         const heatmapContainer = document.getElementById('heatmap-container');
         const heatmapCanvas = document.getElementById('heatmap-chart');
+
+        // Rake Sim Elements
+        const runRakeSimBtn = document.getElementById('run-rake-sim-btn');
+        const randomizeRakeBtn = document.getElementById('randomize-rake-btn');
+        const rakeGameModeSelect = document.getElementById('rakeGameMode');
+        const rakeCtpHoleContainer = document.getElementById('rake-ctp-hole-container');
+        const rakeCtpHoleSelect = document.getElementById('rakeCtpHole');
+        const rakePayoutStructureSelect = document.getElementById('rakePayoutStructure');
+        const rakeEntryFeeInput = document.getElementById('rakeEntryFee');
+        const rakeNumPlayersInput = document.getElementById('rakeNumPlayers');
+        const rakePercentageInput = document.getElementById('rakePercentage');
+        const rakeResultsContainer = document.getElementById('rake-results-container');
+        const rakeInitialMessage = document.getElementById('rake-initial-message');
+        const rakeFinancialSummaryEl = document.getElementById('rake-financial-summary');
+        const rakeLeaderboardCanvas = document.getElementById('rake-leaderboard-chart');
 
 
         // --- CORE MATH & ML FUNCTIONS ---
@@ -438,17 +531,17 @@
             return integralResult === 0 ? 100 : RTP / integralResult;
         }
 
-        function randomNormal(stdDev) {
+        function randomNormal(mean, stdDev) {
             let u1 = 0, u2 = 0;
             while (u1 === 0) u1 = Math.random();
             while (u2 === 0) u2 = Math.random();
             const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-            return z0 * stdDev;
+            return z0 * stdDev + mean;
         }
 
         function simulateShot(s) {
-            const x = randomNormal(s);
-            const y = randomNormal(s);
+            const x = randomNormal(0, s);
+            const y = randomNormal(0, s);
             return Math.sqrt(x * x + y * y);
         }
 
@@ -595,6 +688,7 @@
         };
 
         function initPayoutChart() {
+            if (payoutChartInstance) payoutChartInstance.destroy();
             const ctx = chartCanvas.getContext('2d');
             const specificOptions = JSON.parse(JSON.stringify(chartOptions)); // Deep copy
             specificOptions.plugins.tooltip = {
@@ -614,6 +708,7 @@
         }
         
         function initPmaxHistoryChart() {
+            if (pmaxHistoryChartInstance) pmaxHistoryChartInstance.destroy();
             const ctx = pmaxHistoryCanvas.getContext('2d');
             const specificOptions = JSON.parse(JSON.stringify(chartOptions)); // Deep copy
             specificOptions.scales.x.title.text = 'Update Number';
@@ -627,6 +722,7 @@
         }
 
         function initHouseProfitChart() {
+            if (houseProfitChartInstance) houseProfitChartInstance.destroy();
             const ctx = houseProfitChartCanvas.getContext('2d');
             const specificOptions = JSON.parse(JSON.stringify(chartOptions));
             specificOptions.scales.x.title.text = 'Time (Hours)';
@@ -640,6 +736,7 @@
         }
 
         function initHeatmapChart() {
+            if (heatmapChartInstance) heatmapChartInstance.destroy();
             const ctx = heatmapCanvas.getContext('2d');
             heatmapChartInstance = new Chart(ctx, {
                 type: 'matrix',
@@ -705,6 +802,29 @@
                         }
                     }
                 }
+            });
+        }
+
+        function initRakeLeaderboardChart() {
+            if (rakeLeaderboardChartInstance) rakeLeaderboardChartInstance.destroy();
+            const ctx = rakeLeaderboardCanvas.getContext('2d');
+            const specificOptions = JSON.parse(JSON.stringify(chartOptions));
+            specificOptions.indexAxis = 'y';
+            specificOptions.scales.x.title.text = 'Score';
+            specificOptions.scales.y.title.text = 'Player';
+            rakeLeaderboardChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Score',
+                        data: [],
+                        backgroundColor: brandTan,
+                        borderColor: brandDarkGold,
+                        borderWidth: 1
+                    }]
+                },
+                options: specificOptions
             });
         }
 
@@ -793,7 +913,9 @@
             const updatedKalmanState = kalmanUpdate(holeState, unbiasedMeasurement, dynamicMeasurementNoise);
             holeState.estimate = updatedKalmanState.estimate;
             holeState.errorCovariance = updatedKalmanState.errorCovariance;
-            holeState.p_max_history.push(p_max);
+            if (holeState.p_max_history) {
+                holeState.p_max_history.push(p_max);
+            }
             
             return holeState;
         }
@@ -994,20 +1116,145 @@
             runHouseSimBtn.textContent = 'Run Simulation';
         }
 
+        // --- RAKE SIMULATION LOGIC ---
+        async function runRakeSimulation() {
+            runRakeSimBtn.disabled = true;
+            rakeInitialMessage.classList.add('hidden');
+            rakeResultsContainer.classList.remove('hidden');
+
+            const gameMode = rakeGameModeSelect.value;
+            const payoutStructure = rakePayoutStructureSelect.value;
+            const entryFee = parseFloat(rakeEntryFeeInput.value);
+            const numPlayers = parseInt(rakeNumPlayersInput.value);
+            const rakePercent = parseFloat(rakePercentageInput.value);
+
+            let leaderboard = [];
+
+            for (let i = 0; i < numPlayers; i++) {
+                const handicap = Math.floor(Math.random() * 31);
+                let bestScore = (gameMode === 'longest_drive') ? 0 : Infinity;
+
+                if (gameMode === 'longest_drive') {
+                    const meanDrive = 280 - (handicap * 3.5);
+                    const driveStdDev = 10 + (handicap * 0.5);
+                    for (let j = 0; j < 5; j++) {
+                        const drive = randomNormal(meanDrive, driveStdDev);
+                        if (drive > bestScore) bestScore = drive;
+                    }
+                } else { // Closest to the Pin
+                    const holeId = parseInt(rakeCtpHoleSelect.value);
+                    const hole = holeData.find(h => h.id === holeId);
+                    const dispersion = calculateInitialDispersion(handicap, hole.dist);
+                    for (let j = 0; j < 5; j++) {
+                        const miss = simulateShot(dispersion);
+                        if (miss < bestScore) bestScore = miss;
+                    }
+                }
+                leaderboard.push({ name: `Player ${i+1} (HCP ${handicap})`, score: bestScore });
+            }
+
+            // Sort leaderboard based on game mode
+            if (gameMode === 'longest_drive') {
+                leaderboard.sort((a, b) => b.score - a.score);
+            } else {
+                leaderboard.sort((a, b) => a.score - b.score);
+            }
+            
+            const top10 = leaderboard.slice(0, 10);
+
+            const totalPool = entryFee * numPlayers;
+            const houseRake = totalPool * (rakePercent / 100);
+            const prizePool = totalPool - houseRake;
+
+            // Payout Logic
+            let summaryHTML = `
+                <div class="flex justify-between text-sm text-gray-400">
+                    <span>Total Prize Pool:</span>
+                    <span class="font-semibold text-white">$${totalPool.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-400">
+                    <span>House Rake (${rakePercent}%):</span>
+                    <span class="font-semibold text-white">$${houseRake.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+            `;
+
+            if (payoutStructure === 'winner_takes_all') {
+                summaryHTML += `<div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-700"><span class="text-white">1st Place Payout:</span><span class="text-[#9e8cb4]">$${prizePool.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>`;
+            } else if (payoutStructure === 'top_2') {
+                const first = prizePool * 0.7;
+                const second = prizePool * 0.3;
+                summaryHTML += `<div class="border-t border-gray-700 mt-2 pt-2 space-y-1 text-sm">
+                    <div class="flex justify-between font-bold"><span class="text-white">1st Place:</span><span class="text-[#9e8cb4]">$${first.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-300">2nd Place:</span><span class="text-gray-300">$${second.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                </div>`;
+            } else if (payoutStructure === 'top_3') {
+                const first = prizePool * 0.6;
+                const second = prizePool * 0.3;
+                const third = prizePool * 0.1;
+                summaryHTML += `<div class="border-t border-gray-700 mt-2 pt-2 space-y-1 text-sm">
+                    <div class="flex justify-between font-bold"><span class="text-white">1st Place:</span><span class="text-[#9e8cb4]">$${first.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-300">2nd Place:</span><span class="text-gray-300">$${second.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-300">3rd Place:</span><span class="text-gray-300">$${third.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                </div>`;
+            }
+            rakeFinancialSummaryEl.innerHTML = summaryHTML;
+
+            rakeLeaderboardChartInstance.data.labels = top10.map(p => p.name).reverse();
+            rakeLeaderboardChartInstance.data.datasets[0].data = top10.map(p => p.score).reverse();
+            rakeLeaderboardChartInstance.options.scales.x.title.text = (gameMode === 'longest_drive') ? 'Longest Drive (yds)' : 'Closest to Pin (ft)';
+            rakeLeaderboardChartInstance.update();
+
+            runRakeSimBtn.disabled = false;
+        }
+
+        function randomizeRakeCompetition() {
+            // Random Game Mode
+            const gameModes = rakeGameModeSelect.options;
+            rakeGameModeSelect.selectedIndex = Math.floor(Math.random() * gameModes.length);
+            
+            // Trigger change to show/hide CTP hole selector
+            rakeGameModeSelect.dispatchEvent(new Event('change'));
+
+            // Random Payout Structure
+            const payoutStructures = rakePayoutStructureSelect.options;
+            rakePayoutStructureSelect.selectedIndex = Math.floor(Math.random() * payoutStructures.length);
+
+            // Random Entry Fee ($5 to $50)
+            rakeEntryFeeInput.value = Math.floor(Math.random() * 46) + 5;
+
+            // Random CTP Hole if applicable
+            if (rakeGameModeSelect.value === 'closest_to_pin') {
+                const ctpOptions = rakeCtpHoleSelect.options;
+                rakeCtpHoleSelect.selectedIndex = Math.floor(Math.random() * ctpOptions.length);
+            }
+        }
+
 
         function init() {
             // Page Toggling
             playerSimBtn.addEventListener('click', () => {
                 playerSimPage.classList.remove('hidden');
                 houseSimPage.classList.add('hidden');
+                rakeSimPage.classList.add('hidden');
                 playerSimBtn.classList.add('active');
                 houseSimBtn.classList.remove('active');
+                rakeSimBtn.classList.remove('active');
             });
             houseSimBtn.addEventListener('click', () => {
                 playerSimPage.classList.add('hidden');
                 houseSimPage.classList.remove('hidden');
+                rakeSimPage.classList.add('hidden');
                 playerSimBtn.classList.remove('active');
                 houseSimBtn.classList.add('active');
+                rakeSimBtn.classList.remove('active');
+            });
+             rakeSimBtn.addEventListener('click', () => {
+                playerSimPage.classList.add('hidden');
+                houseSimPage.classList.add('hidden');
+                rakeSimPage.classList.remove('hidden');
+                playerSimBtn.classList.remove('active');
+                houseSimBtn.classList.remove('active');
+                rakeSimBtn.classList.add('active');
             });
 
             // Player Sim Init
@@ -1063,6 +1310,24 @@
             initHouseProfitChart();
             initHeatmapChart();
             runHouseSimBtn.addEventListener('click', runHouseSimulation);
+
+            // Rake Sim Init
+            holeData.forEach(hole => {
+                const option = document.createElement('option');
+                option.value = hole.id;
+                option.textContent = `${hole.dist} yds`;
+                rakeCtpHoleSelect.appendChild(option);
+            });
+            rakeGameModeSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'closest_to_pin') {
+                    rakeCtpHoleContainer.classList.remove('hidden');
+                } else {
+                    rakeCtpHoleContainer.classList.add('hidden');
+                }
+            });
+            initRakeLeaderboardChart();
+            runRakeSimBtn.addEventListener('click', runRakeSimulation);
+            randomizeRakeBtn.addEventListener('click', randomizeRakeCompetition);
         }
 
         document.addEventListener('DOMContentLoaded', init);
