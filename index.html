@@ -3,140 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High Stakes Golf Co. Wagering System</title>
+    <title>Continuum Golf Wagering System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            --brand-purple: #6f42c1;
-            --brand-purple-hover: #5a37a0;
-            --brand-tan: #D2B48C;
+            background-color: #000000; /* Black */
+            --brand-deep-purple: #493b7c;
+            --brand-bright-purple: #604c9c;
+            --brand-tan: #dfc9ad;
             --brand-dark-gold: #7e6649;
+            --brand-lavender: #9e8cb4;
+            --brand-rose-copper: #ac7c6c;
+            --brand-dark-gray: #1F2937; /* gray-800 */
+            --brand-light-gray: #374151; /* gray-700 */
         }
         .slider-thumb::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--brand-purple);
+            width: 24px;
+            height: 24px;
+            background: var(--brand-bright-purple);
             cursor: pointer;
             border-radius: 50%;
+            border: 4px solid var(--brand-dark-gray);
         }
         .slider-thumb::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: var(--brand-purple);
+            width: 24px;
+            height: 24px;
+            background: var(--brand-bright-purple);
             cursor: pointer;
             border-radius: 50%;
+            border: 4px solid var(--brand-dark-gray);
         }
         .hole-btn.active {
-            background-color: var(--brand-purple);
+            background-color: var(--brand-bright-purple);
             color: white;
-            border-color: var(--brand-purple);
+            border-color: var(--brand-bright-purple);
+            box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);
         }
+        .progress-bar-fill {
+            background-color: var(--brand-dark-gold);
+            transition: width 0.5s ease-in-out;
+        }
+        /* Toggle Switch Styles */
+        .toggle-checkbox {
+            transition: transform 0.2s ease-in-out;
+        }
+        .toggle-checkbox:checked {
+            transform: translateX(1rem);
+            border-color: var(--brand-tan);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: var(--brand-bright-purple);
+        }
+        /* Custom scrollbar for aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; } /* gray-900 */
+        ::-webkit-scrollbar-thumb { background: var(--brand-light-gray); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4B5563; } /* gray-600 */
     </style>
 </head>
-<body class="bg-white text-gray-800 flex items-center justify-center min-h-screen p-4">
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-6xl bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 space-y-3">
+    <div class="w-full max-w-7xl bg-black border border-gray-800 rounded-2xl shadow-2xl shadow-[rgba(73,59,124,0.2)] p-6 space-y-6">
         
         <header class="text-center">
-            <h1 class="text-2xl font-bold text-[#6f42c1]">High Stakes Golf Co. Wagering System</h1>
-            <p class="text-gray-500 text-xs mt-1">Rayleigh Distribution Payouts with Kalman Filter-Based RTP Calibration</p>
+            <h1 class="text-4xl font-extrabold text-white">Continuum G<span class="text-[#dfc9ad]">σ</span>lf</h1>
+            <p class="text-gray-400 text-sm mt-2">Rayleigh Distribution Payouts with Kalman Filter-Based RTP Calibration</p>
         </header>
 
         <!-- Main Content Grid -->
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-2 gap-6">
             
             <!-- Left Column: Controls & Charts -->
-            <div class="bg-white border border-gray-200 rounded-xl p-3 space-y-3">
+            <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
                 
-                <div>
-                    <label for="handicap" class="block text-sm font-medium text-gray-700 mb-1">
-                        Starting Handicap: <span id="handicapValue" class="font-bold text-[#6f42c1]">15</span>
-                        <div class="text-xs text-gray-500 mt-1">
-                            Dispersion: 
-                            Current: <span id="dispersionValue" class="font-bold text-gray-900"></span> |
-                            Original: <span id="originalDispersionValue" class="font-bold text-gray-400"></span>
-                        </div>
+                <!-- Player Skill Card -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <label for="handicap" class="block text-sm font-medium text-gray-300 mb-2">
+                        Player Skill Profile
                     </label>
-                    <input type="range" id="handicap" min="0" max="30" value="15" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <div class="flex justify-between items-center text-sm mb-2">
+                        <span>Starting Handicap:</span>
+                        <span id="handicapValue" class="font-bold text-[#9e8cb4] text-lg">15</span>
+                    </div>
+                    <input type="range" id="handicap" min="0" max="30" value="15" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <div class="flex justify-between items-center text-xs text-gray-400 mt-3">
+                        <span>Dispersion (Current / Original):</span>
+                        <span><span id="dispersionValue" class="font-bold text-white"></span> / <span id="originalDispersionValue" class="text-gray-500"></span></span>
+                    </div>
+                    <!-- Skill Confidence Meter -->
+                    <div class="mt-3">
+                        <div class="flex justify-between items-center text-xs text-gray-400 mb-1">
+                            <span>Skill Confidence:</span>
+                            <span id="confidence-text">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="confidence-bar" class="progress-bar-fill h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label for="wager" class="block text-sm font-medium text-gray-700 mb-1">Wager Amount ($)</label>
-                    <input type="number" id="wager" value="5" min="1" class="w-full bg-white border border-gray-300 rounded-lg p-1.5 text-sm text-gray-900 focus:ring-[#6f42c1] focus:border-[#6f42c1]">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Target Hole</label>
-                    <div id="hole-selection" class="grid grid-cols-4 gap-2">
-                        <!-- Hole buttons will be injected here by JS -->
+                <!-- Wager & Target Card -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="wager" class="block text-sm font-medium text-gray-300 mb-2">Wager Amount</label>
+                            <input type="number" id="wager" value="5" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Target Hole</label>
+                            <div id="hole-selection" class="grid grid-cols-4 gap-2">
+                                <!-- Hole buttons will be injected here by JS -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Payout Curve Chart -->
-                <div class="pt-1">
-                     <h2 class="text-base font-semibold text-center mb-1">Personalized Payout Curve</h2>
-                     <div class="relative h-40">
-                        <canvas id="payout-chart"></canvas>
-                     </div>
-                </div>
-
-                <!-- P_max History Chart -->
-                <div class="pt-1">
-                     <h2 class="text-base font-semibold text-center mb-1">P_max History</h2>
-                     <div class="relative h-40">
-                        <canvas id="pmax-history-chart"></canvas>
-                     </div>
+                <!-- Charts -->
+                <div class="grid grid-cols-1 gap-4 pt-2">
+                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                         <h2 class="text-base font-semibold text-center mb-2 text-gray-200">Personalized Payout Curve</h2>
+                         <div class="relative h-40">
+                             <canvas id="payout-chart"></canvas>
+                         </div>
+                    </div>
+                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                        <h2 class="text-base font-semibold text-center mb-2 text-gray-200">P_max History</h2>
+                         <div class="relative h-40">
+                             <canvas id="pmax-history-chart"></canvas>
+                         </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Right Column: Simulation & History -->
-            <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between space-y-3">
+            <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
                 <div class="flex-grow flex flex-col">
-                    <button id="hit-ball-btn" class="w-full bg-[#6f42c1] hover:bg-[#5a37a0] text-white font-bold py-2 px-4 rounded-lg transition duration-300 text-base shadow-lg">
+                    <!-- Developer Mode Toggle -->
+                    <div class="flex items-center justify-center space-x-3 mb-4 bg-[#dfc9ad]/10 border border-[#dfc9ad]/20 rounded-lg p-2">
+                        <label for="devModeToggle" class="text-sm font-medium text-[#dfc9ad]">Developer Mode</label>
+                        <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="devModeToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-gray-700 border-4 border-gray-700 appearance-none cursor-pointer"/>
+                            <label for="devModeToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                        </div>
+                    </div>
+                    <div id="dev-mode-controls" class="hidden mb-4 space-y-2">
+                        <label for="manualMissInput" class="block text-sm font-medium text-gray-300">Manual Miss Distance (ft)</label>
+                        <input type="number" id="manualMissInput" value="10" min="0" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#dfc9ad] focus:border-[#dfc9ad]">
+                    </div>
+
+                    <button id="hit-ball-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600 disabled:shadow-none" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
                         Hit Ball & Simulate
                     </button>
-                    <div class="text-center mt-3 flex-grow flex flex-col justify-center">
-                        <h2 class="text-base font-semibold">Shot Outcome <span id="shot-batch-status" class="text-xs text-gray-500 font-normal"></span></h2>
-                        <div class="w-full aspect-square max-w-[240px] mx-auto bg-gray-100 rounded-full flex items-center justify-center relative my-1">
-                            <canvas id="shot-visualizer" width="240" height="240"></canvas>
+                    <div class="text-center mt-4 flex-grow flex flex-col justify-center">
+                        <h2 class="text-lg font-semibold text-gray-200">Shot Outcome <span id="shot-batch-status" class="text-xs text-gray-400 font-normal"></span></h2>
+                        <div class="w-full aspect-square max-w-[280px] mx-auto rounded-full flex items-center justify-center relative my-2" style="background: radial-gradient(circle, rgba(96, 76, 156, 0.2) 0%, rgba(73, 59, 124, 0.6) 70%);">
+                            <canvas id="shot-visualizer" width="280" height="280"></canvas>
                         </div>
-                        <div id="results" class="w-full space-y-1 pt-1 text-sm">
-                            <p class="text-gray-500">Set your handicap, wager, and select a hole to begin.</p>
+                        <div id="results" class="w-full max-w-sm mx-auto space-y-2 pt-2 text-sm bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                            <p class="text-gray-400">Set your skill, wager, and select a hole to begin.</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Session Tracker -->
-                <div class="w-full pt-2 mt-2 border-t border-gray-200 space-y-1">
-                    <h2 class="text-base font-semibold text-center">Session Tracker</h2>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Money Wagered:</span>
-                        <span id="totalWagered" class="font-semibold">$0.00</span>
+                <div class="w-full pt-4 mt-4 border-t border-gray-700 space-y-2 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h2 class="text-base font-semibold text-center text-gray-200 mb-2">Session Tracker</h2>
+                    <div class="flex justify-between text-sm text-gray-400">
+                        <span>Money Wagered:</span>
+                        <span id="totalWagered" class="font-semibold text-white">$0.00</span>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Money Won:</span>
-                        <span id="totalWon" class="font-semibold">$0.00</span>
+                    <div class="flex justify-between text-sm text-gray-400">
+                        <span>Money Won:</span>
+                        <span id="totalWon" class="font-semibold text-white">$0.00</span>
                     </div>
-                    <div class="flex justify-between text-sm font-bold">
-                        <span class="text-gray-800">Net Gain/Loss:</span>
+                    <div class="flex justify-between text-sm font-bold mt-1 pt-1 border-t border-gray-700">
+                        <span class="text-gray-200">Net Gain/Loss:</span>
                         <span id="netTotal" class="font-semibold">$0.00</span>
                     </div>
-                    <div class="flex justify-between text-sm mt-1 pt-1 border-t border-gray-200/80">
-                        <span class="text-gray-600">Set House Edge (Hole):</span>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-700/50">
+                        <span>Set House Edge (Hole):</span>
                         <span id="setHouseEdge" class="font-semibold">0.0%</span>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Current House Edge (Session):</span>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Current House Edge (Session):</span>
                         <span id="calculatedHouseEdge" class="font-semibold">0.0%</span>
                     </div>
-                    <div class="flex space-x-2 mt-2">
-                        <button id="reset-skill-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 text-xs">Reset Skill Model</button>
-                        <button id="reset-session-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 text-xs">Reset Session</button>
+                    <div class="flex space-x-3 mt-3">
+                        <button id="reset-skill-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-lavender);">Reset Skill</button>
+                        <button id="reset-session-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-rose-copper);">Reset Session</button>
                     </div>
                 </div>
             </div>
@@ -155,30 +214,30 @@
             { id: 7, dist: 225, d_max: 84.84, RTP: 0.90, k: 6.5 },
             { id: 8, dist: 250, d_max: 101.14, RTP: 0.90, k: 6.5 },
         ];
+        const BATCH_SIZE = 5;
+        const WAGER_THRESHOLD_MULTIPLIER = 10;
         
         // --- STATE MANAGEMENT ---
-        let playerState = {
-            kalmanFilters: {}
-        };
+        let playerState = { kalmanFilters: {} };
         let selectedHoleId = 4;
         let payoutChartInstance = null;
         let pmaxHistoryChartInstance = null;
         let lastShotData = null;
         let totalWagered = 0;
         let totalWon = 0;
-        const brandPurple = '#6f42c1';
-        const brandTan = '#D2B48C';
-        const brandLavender = '#9e8cb4';
-        const brandRoseCopper = '#ac7c6c';
-        const brandMutedBrown = '#947c69';
+        const brandBrightPurple = '#604c9c';
         const brandDarkGold = '#7e6649';
-        const darkTextColor = '#374151'; // gray-700
+        const brandTan = '#dfc9ad';
+        const brandRoseCopper = '#ac7c6c';
+        const textColor = 'rgba(223, 201, 173, 0.8)';
 
         // --- DOM ELEMENTS ---
         const handicapSlider = document.getElementById('handicap');
         const handicapValue = document.getElementById('handicapValue');
         const dispersionValue = document.getElementById('dispersionValue');
         const originalDispersionValue = document.getElementById('originalDispersionValue');
+        const confidenceBar = document.getElementById('confidence-bar');
+        const confidenceText = document.getElementById('confidence-text');
         const wagerInput = document.getElementById('wager');
         const hitBallBtn = document.getElementById('hit-ball-btn');
         const resultsDiv = document.getElementById('results');
@@ -195,7 +254,9 @@
         const resetSkillBtn = document.getElementById('reset-skill-btn');
         const resetSessionBtn = document.getElementById('reset-session-btn');
         const shotBatchStatusEl = document.getElementById('shot-batch-status');
-
+        const devModeToggle = document.getElementById('devModeToggle');
+        const devModeControls = document.getElementById('dev-mode-controls');
+        const manualMissInput = document.getElementById('manualMissInput');
 
         // --- CORE MATH & ML FUNCTIONS ---
         function calculateInitialDispersion(handicap, distanceYds) {
@@ -205,15 +266,11 @@
             return distanceYds * 3 * finalAlpha;
         }
         
-        function kalmanUpdate(prior, measurement) {
+        function kalmanUpdate(prior, measurement, measurementNoise) {
             const processNoise = 0.1; 
-            const measurementNoise = 500.0;
-            const learningRateScale = 0.15;
-            const learningRate = learningRateScale * Math.log10(prior.cumulativeWager + 1);
             const predictedEstimate = prior.estimate;
             const predictedErrorCovariance = prior.errorCovariance + processNoise;
             let kalmanGain = predictedErrorCovariance / (predictedErrorCovariance + measurementNoise);
-            kalmanGain *= Math.min(learningRate, 1.0);
             const posteriorEstimate = predictedEstimate + kalmanGain * (measurement - predictedEstimate);
             const posteriorErrorCovariance = (1 - kalmanGain) * predictedErrorCovariance;
 
@@ -231,15 +288,13 @@
                     initialEstimate: initialDispersion,
                     estimate: initialDispersion,
                     errorCovariance: 1000,
-                    cumulativeWager: 0,
                     p_max_history: [],
                     shot_batch: [],
                 };
             });
             lastShotData = null;
-            updateUIDisplay();
-            updatePayoutChart();
-            updatePmaxHistoryChart();
+            updateAllDisplays();
+            saveState();
         }
 
         function numericalIntegrate(func, a, b, n) {
@@ -278,16 +333,43 @@
         }
 
         // --- UI & VISUALIZATION ---
+        function updateAllDisplays() {
+            updateUIDisplay();
+            updateTrackerUI();
+            updatePayoutChart();
+            updatePmaxHistoryChart();
+        }
+
+        function calculateConfidence(errorCovariance) {
+            const minUncertainty = 50;
+            const maxUncertainty = 1000;
+            if (errorCovariance >= maxUncertainty) return 0;
+            if (errorCovariance <= minUncertainty) return 100;
+            const confidence = 100 * (1 - Math.log(errorCovariance / minUncertainty) / Math.log(maxUncertainty / minUncertainty));
+            return Math.max(0, Math.min(100, confidence));
+        }
+
+        function updateConfidenceUI(holeState) {
+            const confidence = calculateConfidence(holeState.errorCovariance);
+            confidenceBar.style.width = `${confidence}%`;
+            confidenceText.textContent = `${confidence.toFixed(0)}%`;
+        }
+
         function updateUIDisplay() {
             const handicap = parseInt(handicapSlider.value);
             const holeState = playerState.kalmanFilters[selectedHoleId];
+            if (!holeState) return;
             const currentDispersion = holeState.estimate;
             const originalDispersion = holeState.initialEstimate;
             
             handicapValue.textContent = handicap;
             dispersionValue.textContent = `${currentDispersion.toFixed(1)} ft`;
             originalDispersionValue.textContent = `${originalDispersion.toFixed(1)} ft`;
-            shotBatchStatusEl.textContent = `(Shot ${holeState.shot_batch.length + 1} of 5)`;
+            shotBatchStatusEl.textContent = `(Shot ${holeState.shot_batch.length + 1} of ${BATCH_SIZE})`;
+            
+            const hole = holeData.find(h => h.id === selectedHoleId);
+            drawTarget(hole.d_max, currentDispersion);
+            updateConfidenceUI(holeState);
         }
         
         function updateTrackerUI() {
@@ -295,13 +377,7 @@
             totalWonEl.textContent = `$${totalWon.toFixed(2)}`;
             const net = totalWon - totalWagered;
             netTotalEl.textContent = `${net < 0 ? '-' : ''}$${Math.abs(net).toFixed(2)}`;
-            if (net > 0) {
-                netTotalEl.className = 'font-semibold text-[#6f42c1]';
-            } else if (net < 0) {
-                netTotalEl.className = 'font-semibold text-red-600';
-            } else {
-                netTotalEl.className = 'font-semibold text-gray-900';
-            }
+            netTotalEl.className = `font-semibold ${net > 0 ? 'text-[#9e8cb4]' : net < 0 ? 'text-[#ac7c6c]' : 'text-white'}`;
 
             const selectedHole = holeData.find(h => h.id === selectedHoleId);
             const setEdge = (1 - selectedHole.RTP) * 100;
@@ -313,59 +389,108 @@
             }
             calculatedHouseEdgeEl.textContent = `${calculatedEdge.toFixed(1)}%`;
         }
+        
+        function drawProbabilityDensity(s, d_max) {
+            const center = shotCanvas.width / 2;
+            const maxRadiusPx = center * 0.95;
+            const dispersionPx = (s / d_max) * maxRadiusPx;
+            const numCircles = 10;
+            for (let i = numCircles; i > 0; i--) {
+                shotCtx.beginPath();
+                const radius = (i / numCircles) * (dispersionPx * 3); 
+                shotCtx.arc(center, center, Math.min(radius, maxRadiusPx), 0, 2 * Math.PI);
+                shotCtx.fillStyle = `rgba(96, 76, 156, ${0.15 / i})`;
+                shotCtx.fill();
+            }
+        }
 
-        function drawTarget(d_max) {
+        function drawTarget(d_max, currentDispersion) {
             const center = shotCanvas.width / 2;
             shotCtx.clearRect(0, 0, shotCanvas.width, shotCanvas.height);
-            
+            if (currentDispersion) {
+                drawProbabilityDensity(currentDispersion, d_max);
+            }
             for(let i = 1; i <= 4; i++) {
                 shotCtx.beginPath();
                 shotCtx.arc(center, center, (center * 0.95) * (i/4), 0, 2 * Math.PI);
-                shotCtx.strokeStyle = `rgba(111, 66, 193, 0.7)`;
+                shotCtx.strokeStyle = `rgba(223, 201, 173, 0.2)`;
                 shotCtx.lineWidth = 1;
                 shotCtx.stroke();
             }
             shotCtx.beginPath();
-            shotCtx.arc(center, center, 3, 0, 2 * Math.PI);
-            shotCtx.fillStyle = brandPurple;
+            shotCtx.arc(center, center, 4, 0, 2 * Math.PI);
+            shotCtx.fillStyle = brandTan;
             shotCtx.fill();
         }
 
         function drawShot(missDistance, d_max) {
             const center = shotCanvas.width / 2;
             const maxRadius = center * 0.95;
-            const radius = (missDistance / d_max) * maxRadius;
+            const radius = Math.min((missDistance / d_max) * maxRadius, maxRadius);
             const angle = Math.random() * 2 * Math.PI;
             const x = center + radius * Math.cos(angle);
             const y = center + radius * Math.sin(angle);
             shotCtx.beginPath();
-            shotCtx.arc(x, y, 5, 0, 2 * Math.PI);
-            shotCtx.fillStyle = '#374151'; // Dark gray for shot
+            shotCtx.arc(x, y, 6, 0, 2 * Math.PI);
+            shotCtx.fillStyle = brandTan;
             shotCtx.fill();
-            shotCtx.strokeStyle = 'white';
-            shotCtx.lineWidth = 1.5;
+            shotCtx.strokeStyle = 'rgba(0,0,0,0.5)';
+            shotCtx.lineWidth = 2;
             shotCtx.stroke();
         }
 
+        const chartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { 
+                    title: { display: true, text: 'Miss Distance (ft)', color: textColor, font: { size: 10 } }, 
+                    ticks: { color: textColor, font: { size: 10 } },
+                    grid: { color: 'rgba(223, 201, 173, 0.1)' }
+                },
+                y: { 
+                    title: { display: true, text: 'Multiplier (x)', color: textColor, font: { size: 10 } }, 
+                    ticks: { color: textColor, font: { size: 10 } },
+                    grid: { color: 'rgba(223, 201, 173, 0.1)' },
+                    beginAtZero: true 
+                }
+            }
+        };
+
         function initPayoutChart() {
             const ctx = chartCanvas.getContext('2d');
+            const specificOptions = JSON.parse(JSON.stringify(chartOptions)); // Deep copy
+            specificOptions.plugins.tooltip = {
+                callbacks: {
+                    title: (tooltipItems) => `Miss: ${tooltipItems[0].label}`,
+                    label: (tooltipItem) => `Multiplier: ${tooltipItem.raw.toFixed(2)}x`
+                }
+            };
             payoutChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: 'Payout Multiplier', data: [], borderColor: brandPurple, backgroundColor: 'rgba(111, 66, 193, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }, { label: 'Last Shot', data: [], backgroundColor: '#374151', borderColor: 'white', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (tooltipItems) => `Miss: ${tooltipItems[0].label}`, label: (tooltipItem) => `Multiplier: ${tooltipItem.raw.toFixed(2)}x` } } }, scales: { x: { title: { display: true, text: 'Miss Distance (ft)', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } } }, y: { title: { display: true, text: 'Multiplier (x)', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } }, beginAtZero: true } } }
+                data: { labels: [], datasets: [
+                    { label: 'Payout Multiplier', data: [], borderColor: brandBrightPurple, backgroundColor: 'rgba(96, 76, 156, 0.2)', fill: true, tension: 0.4, pointRadius: 0 }, 
+                    { label: 'Last Shot', data: [], backgroundColor: brandDarkGold, borderColor: 'white', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }
+                ]},
+                options: specificOptions
             });
         }
         
         function initPmaxHistoryChart() {
             const ctx = pmaxHistoryCanvas.getContext('2d');
+            const specificOptions = JSON.parse(JSON.stringify(chartOptions)); // Deep copy
+            specificOptions.scales.x.title.text = 'Update Number';
+            specificOptions.scales.y.title.text = 'P_max (x)';
+            specificOptions.scales.y.beginAtZero = false;
             pmaxHistoryChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: 'P_max', data: [], borderColor: brandDarkGold, backgroundColor: 'rgba(126, 102, 73, 0.1)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: brandDarkGold }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Update Number', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } } }, y: { title: { display: true, text: 'P_max (x)', color: darkTextColor }, ticks: { color: darkTextColor, font: { size: 10 } }, beginAtZero: false } } }
+                data: { labels: [], datasets: [{ label: 'P_max', data: [], borderColor: brandDarkGold, backgroundColor: 'rgba(126, 102, 73, 0.2)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: brandDarkGold }] },
+                options: specificOptions
             });
         }
 
         function updatePayoutChart() {
+            if (!payoutChartInstance || !playerState.kalmanFilters[selectedHoleId]) return;
             const hole = holeData.find(h => h.id === selectedHoleId);
             const s = playerState.kalmanFilters[selectedHoleId].estimate;
             const p_max = calculatePmax(s, hole);
@@ -375,21 +500,18 @@
             for (let i = 0; i <= steps; i++) {
                 const d = (i / steps) * hole.d_max;
                 labels.push(d.toFixed(1));
-                const multiplier = p_max * Math.pow(1 - d / hole.d_max, hole.k);
-                curveData.push(multiplier);
+                curveData.push(p_max * Math.pow(1 - d / hole.d_max, hole.k));
             }
             const shotMarkerData = new Array(steps + 1).fill(null);
             if(lastShotData) {
-                let closestIndex = 0;
-                let minDiff = Infinity;
-                labels.forEach((label, index) => {
+                const closestIndex = labels.reduce((bestIndex, label, currentIndex, arr) => {
                     const diff = Math.abs(parseFloat(label) - lastShotData.missDistance);
-                    if (diff < minDiff) { minDiff = diff; closestIndex = index; }
-                });
+                    const bestDiff = Math.abs(parseFloat(arr[bestIndex]) - lastShotData.missDistance);
+                    return diff < bestDiff ? currentIndex : bestIndex;
+                }, 0);
                 shotMarkerData[closestIndex] = lastShotData.multiplier;
             }
-            const displayLabels = labels.map(l => `${l} ft`);
-            payoutChartInstance.data.labels = displayLabels;
+            payoutChartInstance.data.labels = labels.map(l => `${l} ft`);
             payoutChartInstance.data.datasets[0].data = curveData;
             payoutChartInstance.data.datasets[1].data = shotMarkerData;
             payoutChartInstance.options.scales.y.max = Math.ceil(p_max / 5) * 5;
@@ -397,25 +519,98 @@
         }
         
         function updatePmaxHistoryChart() {
+            if (!pmaxHistoryChartInstance || !playerState.kalmanFilters[selectedHoleId]) return;
             const history = playerState.kalmanFilters[selectedHoleId].p_max_history;
             pmaxHistoryChartInstance.data.labels = history.map((_, i) => `Update ${i + 1}`);
             pmaxHistoryChartInstance.data.datasets[0].data = history;
             pmaxHistoryChartInstance.update();
         }
 
+        // --- DATA PERSISTENCE ---
+        function saveState() {
+            try {
+                localStorage.setItem('golfWagerPlayerState', JSON.stringify(playerState));
+                localStorage.setItem('golfWagerTotalWagered', totalWagered);
+                localStorage.setItem('golfWagerTotalWon', totalWon);
+            } catch (e) { console.error("Could not save state:", e); }
+        }
+
+        function loadState() {
+            try {
+                const savedState = localStorage.getItem('golfWagerPlayerState');
+                if (savedState) {
+                    playerState = JSON.parse(savedState);
+                    totalWagered = parseFloat(localStorage.getItem('golfWagerTotalWagered')) || 0;
+                    totalWon = parseFloat(localStorage.getItem('golfWagerTotalWon')) || 0;
+                } else {
+                    resetSkillModel();
+                }
+            } catch (e) {
+                console.error("Could not load state:", e);
+                resetSkillModel();
+            }
+        }
+
         // --- EVENT HANDLERS & INITIALIZATION ---
+        function calculateVariance(batch) {
+            if (batch.length < 2) return 0; // Variance is 0 for a single shot
+            const mean = batch.reduce((sum, shot) => sum + shot.miss, 0) / batch.length;
+            const squaredDiffs = batch.map(shot => Math.pow(shot.miss - mean, 2));
+            return squaredDiffs.reduce((sum, val) => sum + val, 0) / batch.length;
+        }
+
+        function processBatch(holeState, batch, p_max) {
+            const totalWagerInBatch = batch.reduce((sum, shot) => sum + shot.wager, 0);
+            if (totalWagerInBatch === 0) return holeState;
+
+            const weightedSumOfMisses = batch.reduce((sum, shot) => sum + (shot.miss * shot.wager), 0);
+            const weightedAverageMiss = weightedSumOfMisses / totalWagerInBatch;
+            const unbiasedMeasurement = weightedAverageMiss / Math.sqrt(Math.PI / 2);
+            
+            // --- DYNAMIC MEASUREMENT NOISE ---
+            const batchVariance = calculateVariance(batch);
+            const baseMeasurementNoise = 500.0;
+            // Increase noise based on how inconsistent the player was in that batch
+            const dynamicMeasurementNoise = baseMeasurementNoise + batchVariance * 10; 
+
+            const updatedKalmanState = kalmanUpdate(holeState, unbiasedMeasurement, dynamicMeasurementNoise);
+            holeState.estimate = updatedKalmanState.estimate;
+            holeState.errorCovariance = updatedKalmanState.errorCovariance;
+            holeState.p_max_history.push(p_max);
+            
+            return holeState;
+        }
+
         function handleSimulation() {
+            hitBallBtn.disabled = true;
+            hitBallBtn.textContent = 'Simulating...';
+
             const wager = parseFloat(wagerInput.value);
             const hole = holeData.find(h => h.id === selectedHoleId);
             if (isNaN(wager) || wager <= 0) {
                 resultsDiv.innerHTML = `<p class="text-red-500 font-semibold">Please enter a valid wager.</p>`;
+                hitBallBtn.disabled = false;
+                hitBallBtn.textContent = 'Hit Ball & Simulate';
                 return;
             }
 
-            const holeState = playerState.kalmanFilters[selectedHoleId];
+            let holeState = playerState.kalmanFilters[selectedHoleId];
             const s = holeState.estimate;
             const p_max = calculatePmax(s, hole);
-            const missDistance = simulateShot(s);
+            
+            let missDistance;
+            if (devModeToggle.checked) {
+                missDistance = parseFloat(manualMissInput.value);
+                if (isNaN(missDistance) || missDistance < 0) {
+                    resultsDiv.innerHTML = `<p class="text-red-500 font-semibold">Please enter a valid manual miss distance.</p>`;
+                    hitBallBtn.disabled = false;
+                    hitBallBtn.textContent = 'Hit Ball & Simulate';
+                    return;
+                }
+            } else {
+                missDistance = simulateShot(s);
+            }
+
             let payout = 0;
             let multiplier = 0;
             if (missDistance <= hole.d_max) {
@@ -425,70 +620,77 @@
             lastShotData = { missDistance, multiplier };
             totalWagered += wager;
             totalWon += payout;
-
-            // Add shot to batch
-            holeState.shot_batch.push(missDistance);
-            holeState.cumulativeWager += wager;
             
             let updateMessage = "";
 
-            // Check if batch is complete
-            if (holeState.shot_batch.length >= 5) {
-                const averageMiss = holeState.shot_batch.reduce((a, b) => a + b, 0) / holeState.shot_batch.length;
-                const unbiasedMeasurement = averageMiss / Math.sqrt(Math.PI / 2);
+            const missForSkillUpdate = Math.min(missDistance, hole.d_max);
 
-                const updatedKalmanState = kalmanUpdate(holeState, unbiasedMeasurement);
-                holeState.estimate = updatedKalmanState.estimate;
-                holeState.errorCovariance = updatedKalmanState.errorCovariance;
-                
-                holeState.p_max_history.push(p_max);
-                updateMessage = `<p class="text-xs text-blue-500 mt-1">Skill model updated.</p>`;
-                updatePmaxHistoryChart();
-                
-                holeState.shot_batch = []; // Reset batch
+            const avgWagerInBatch = holeState.shot_batch.reduce((sum, shot) => sum + shot.wager, 0) / (holeState.shot_batch.length || 1);
+            const isHighStakesShot = wager >= avgWagerInBatch * WAGER_THRESHOLD_MULTIPLIER && holeState.shot_batch.length > 0;
+
+            if (isHighStakesShot) {
+                if (holeState.shot_batch.length > 0) {
+                    holeState = processBatch(holeState, holeState.shot_batch, p_max);
+                    updateMessage += `<p class="text-xs text-blue-400 mt-1">Low-stakes batch processed.</p>`;
+                }
+                holeState = processBatch(holeState, [{ miss: missForSkillUpdate, wager: wager }], p_max);
+                updateMessage += `<p class="text-sm font-bold text-[#9e8cb4] mt-1">High-stakes shot triggered an immediate skill update!</p>`;
+                holeState.shot_batch = [];
+            } else {
+                holeState.shot_batch.push({ miss: missForSkillUpdate, wager: wager });
+                if (holeState.shot_batch.length >= BATCH_SIZE) {
+                    holeState = processBatch(holeState, holeState.shot_batch, p_max);
+                    updateMessage = `<p class="text-sm font-bold text-[#9e8cb4] mt-2">Skill model updated based on last ${BATCH_SIZE} shots.</p>`;
+                    holeState.shot_batch = [];
+                }
             }
 
-            updateUIDisplay();
-            updateTrackerUI();
             resultsDiv.innerHTML = `
-                <div class="grid grid-cols-2 gap-2 text-left text-sm">
-                    <p class="text-gray-600">Miss Distance:</p><p class="font-semibold text-gray-900">${missDistance.toFixed(2)} ft</p>
-                    <p class="text-gray-600">Your P_max:</p><p class="font-semibold text-gray-900">${p_max.toFixed(2)}x</p>
-                    <p class="text-gray-600">Multiplier:</p><p class="font-semibold text-gray-900">${multiplier.toFixed(2)}x</p>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-left">
+                    <p class="text-gray-400">Miss Distance:</p><p class="font-semibold text-white text-right">${missDistance.toFixed(2)} ft</p>
+                    <p class="text-gray-400">Your P_max:</p><p class="font-semibold text-white text-right">${p_max.toFixed(2)}x</p>
+                    <p class="text-gray-400">Multiplier:</p><p class="font-semibold text-white text-right">${multiplier.toFixed(2)}x</p>
                 </div>
-                <div class="mt-1 pt-1 border-t border-gray-200">
-                    <p class="text-base">Payout: <span class="font-bold text-xl ${payout >= wager ? 'text-[#6f42c1]' : 'text-red-600'}">$${payout.toFixed(2)}</span></p>
+                <div class="mt-2 pt-2 border-t border-gray-700">
+                    <p class="text-lg text-center">Payout: <span class="font-bold text-2xl ${payout >= wager ? 'text-[#9e8cb4]' : 'text-[#ac7c6c]'}">$${payout.toFixed(2)}</span></p>
                 </div>
                 ${updateMessage}
             `;
-            drawTarget(hole.d_max);
+            
+            updateAllDisplays();
             drawShot(missDistance, hole.d_max);
-            updatePayoutChart();
+            saveState();
+
+            hitBallBtn.disabled = false;
+            hitBallBtn.textContent = 'Hit Ball & Simulate';
         }
 
         function init() {
+            const hitBtn = document.getElementById('hit-ball-btn');
+            hitBtn.addEventListener('mouseover', () => hitBtn.style.backgroundColor = 'var(--brand-deep-purple)');
+            hitBtn.addEventListener('mouseout', () => hitBtn.style.backgroundColor = 'var(--brand-bright-purple)');
+
             holeData.forEach(hole => {
                 const button = document.createElement('button');
-                button.className = 'hole-btn border border-gray-300 rounded-md p-1.5 text-xs hover:bg-[#5a37a0] hover:text-white transition';
+                button.className = 'hole-btn border border-gray-600 rounded-md p-2 text-xs text-gray-300 hover:bg-[#493b7c] hover:border-[#493b7c] transition';
                 button.textContent = `${hole.dist}y`;
                 button.dataset.holeId = hole.id;
                 if (hole.id === selectedHoleId) button.classList.add('active');
                 
                 button.addEventListener('click', () => {
-                    selectedHoleId = hole.id;
+                    selectedHoleId = parseInt(button.dataset.holeId);
                     lastShotData = null;
                     document.querySelectorAll('.hole-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    const currentHole = holeData.find(h => h.id === selectedHoleId);
-                    drawTarget(currentHole.d_max);
-                    updateUIDisplay();
-                    updatePayoutChart();
-                    updatePmaxHistoryChart();
+                    updateAllDisplays();
                 });
                 holeSelectionDiv.appendChild(button);
             });
             
             handicapSlider.addEventListener('input', (e) => {
+                handicapValue.textContent = e.target.value;
+            });
+            handicapSlider.addEventListener('change', (e) => {
                 resetSkillModel();
             });
             
@@ -498,19 +700,24 @@
                 totalWagered = 0;
                 totalWon = 0;
                 updateTrackerUI();
+                saveState();
+            });
+
+            devModeToggle.addEventListener('change', () => {
+                devModeControls.classList.toggle('hidden');
             });
 
             hitBallBtn.addEventListener('click', handleSimulation);
 
-            const initialHole = holeData.find(h => h.id === selectedHoleId);
-            drawTarget(initialHole.d_max);
             initPayoutChart();
             initPmaxHistoryChart();
-            resetSkillModel();
-            updateTrackerUI();
+            loadState();
+            
+            updateAllDisplays();
         }
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
+
