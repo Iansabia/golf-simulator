@@ -6,6 +6,7 @@
     <title>Continuum Golf Wagering System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
@@ -59,6 +60,14 @@
         .toggle-checkbox:checked + .toggle-label {
             background-color: var(--brand-bright-purple);
         }
+        .page-toggle-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .page-toggle-btn.active {
+            background-color: var(--brand-bright-purple);
+            color: white;
+            box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);
+        }
         /* Custom scrollbar for aesthetics */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #111827; } /* gray-900 */
@@ -75,131 +84,215 @@
             <p class="text-gray-400 text-sm mt-2">Rayleigh Distribution Payouts with Kalman Filter-Based RTP Calibration</p>
         </header>
 
-        <!-- Main Content Grid -->
-        <div class="grid md:grid-cols-2 gap-6">
-            
-            <!-- Left Column: Controls & Charts -->
-            <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
-                
-                <!-- Player Skill Card -->
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                    <label for="handicap" class="block text-sm font-medium text-gray-300 mb-2">
-                        Player Skill Profile
-                    </label>
-                    <div class="flex justify-between items-center text-sm mb-2">
-                        <span>Starting Handicap:</span>
-                        <span id="handicapValue" class="font-bold text-[#9e8cb4] text-lg">15</span>
-                    </div>
-                    <input type="range" id="handicap" min="0" max="30" value="15" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb">
-                    <div class="flex justify-between items-center text-xs text-gray-400 mt-3">
-                        <span>Dispersion (Current / Original):</span>
-                        <span><span id="dispersionValue" class="font-bold text-white"></span> / <span id="originalDispersionValue" class="text-gray-500"></span></span>
-                    </div>
-                    <!-- Skill Confidence Meter -->
-                    <div class="mt-3">
-                        <div class="flex justify-between items-center text-xs text-gray-400 mb-1">
-                            <span>Skill Confidence:</span>
-                            <span id="confidence-text">0%</span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-2">
-                            <div id="confidence-bar" class="progress-bar-fill h-2 rounded-full" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Page Toggles -->
+        <div class="flex justify-center border-b border-gray-700">
+            <button id="player-sim-btn" class="page-toggle-btn active py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Player Simulator</button>
+            <button id="house-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">House Profit Simulator</button>
+        </div>
 
-                <!-- Wager & Target Card -->
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="wager" class="block text-sm font-medium text-gray-300 mb-2">Wager Amount</label>
-                            <input type="number" id="wager" value="5" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#604c9c] focus:border-[#604c9c]">
+        <!-- Player Simulator Page -->
+        <div id="player-simulator-page">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Left Column: Controls & Charts -->
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
+                    
+                    <!-- Player Skill Card -->
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <label for="handicap" class="block text-sm font-medium text-gray-300 mb-2">
+                            Player Skill Profile
+                        </label>
+                        <div class="flex justify-between items-center text-sm mb-2">
+                            <span>Starting Handicap:</span>
+                            <span id="handicapValue" class="font-bold text-[#9e8cb4] text-lg">15</span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Target Hole</label>
-                            <div id="hole-selection" class="grid grid-cols-4 gap-2">
-                                <!-- Hole buttons will be injected here by JS -->
+                        <input type="range" id="handicap" min="0" max="30" value="15" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <div class="flex justify-between items-center text-xs text-gray-400 mt-3">
+                            <span>Dispersion (Current / Original):</span>
+                            <span><span id="dispersionValue" class="font-bold text-white"></span> / <span id="originalDispersionValue" class="text-gray-500"></span></span>
+                        </div>
+                        <!-- Skill Confidence Meter -->
+                        <div class="mt-3">
+                            <div class="flex justify-between items-center text-xs text-gray-400 mb-1">
+                                <span>Skill Confidence:</span>
+                                <span id="confidence-text">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div id="confidence-bar" class="progress-bar-fill h-2 rounded-full" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Charts -->
-                <div class="grid grid-cols-1 gap-4 pt-2">
-                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-                         <h2 class="text-base font-semibold text-center mb-2 text-gray-200">Personalized Payout Curve</h2>
-                         <div class="relative h-40">
-                             <canvas id="payout-chart"></canvas>
-                         </div>
-                    </div>
-                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-                        <h2 class="text-base font-semibold text-center mb-2 text-gray-200">P_max History</h2>
-                         <div class="relative h-40">
-                             <canvas id="pmax-history-chart"></canvas>
-                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Right Column: Simulation & History -->
-            <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
-                <div class="flex-grow flex flex-col">
-                    <!-- Developer Mode Toggle -->
-                    <div class="flex items-center justify-center space-x-3 mb-4 bg-[#dfc9ad]/10 border border-[#dfc9ad]/20 rounded-lg p-2">
-                        <label for="devModeToggle" class="text-sm font-medium text-[#dfc9ad]">Developer Mode</label>
-                        <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" name="toggle" id="devModeToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-gray-700 border-4 border-gray-700 appearance-none cursor-pointer"/>
-                            <label for="devModeToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                    <!-- Wager & Target Card -->
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="wager" class="block text-sm font-medium text-gray-300 mb-2">Wager Amount</label>
+                                <input type="number" id="wager" value="5" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#604c9c] focus:border-[#604c9c]">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Target Hole</label>
+                                <div id="hole-selection" class="grid grid-cols-4 gap-2">
+                                    <!-- Hole buttons will be injected here by JS -->
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div id="dev-mode-controls" class="hidden mb-4 space-y-2">
-                        <label for="manualMissInput" class="block text-sm font-medium text-gray-300">Manual Miss Distance (ft)</label>
-                        <input type="number" id="manualMissInput" value="10" min="0" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#dfc9ad] focus:border-[#dfc9ad]">
-                    </div>
-
-                    <button id="hit-ball-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600 disabled:shadow-none" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
-                        Hit Ball & Simulate
-                    </button>
-                    <div class="text-center mt-4 flex-grow flex flex-col justify-center">
-                        <h2 class="text-lg font-semibold text-gray-200">Shot Outcome <span id="shot-batch-status" class="text-xs text-gray-400 font-normal"></span></h2>
-                        <div class="w-full aspect-square max-w-[280px] mx-auto rounded-full flex items-center justify-center relative my-2" style="background: radial-gradient(circle, rgba(96, 76, 156, 0.2) 0%, rgba(73, 59, 124, 0.6) 70%);">
-                            <canvas id="shot-visualizer" width="280" height="280"></canvas>
+                    
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 gap-4 pt-2">
+                        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                             <h2 class="text-base font-semibold text-center mb-2 text-gray-200">Personalized Payout Curve</h2>
+                             <div class="relative h-40">
+                                 <canvas id="payout-chart"></canvas>
+                             </div>
                         </div>
-                        <div id="results" class="w-full max-w-sm mx-auto space-y-2 pt-2 text-sm bg-gray-800/50 p-3 rounded-lg border border-gray-700">
-                            <p class="text-gray-400">Set your skill, wager, and select a hole to begin.</p>
+                        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                            <h2 class="text-base font-semibold text-center mb-2 text-gray-200">P_max History</h2>
+                             <div class="relative h-40">
+                                 <canvas id="pmax-history-chart"></canvas>
+                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Session Tracker -->
-                <div class="w-full pt-4 mt-4 border-t border-gray-700 space-y-2 bg-gray-800 p-4 rounded-lg border border-gray-700">
-                    <h2 class="text-base font-semibold text-center text-gray-200 mb-2">Session Tracker</h2>
-                    <div class="flex justify-between text-sm text-gray-400">
-                        <span>Money Wagered:</span>
-                        <span id="totalWagered" class="font-semibold text-white">$0.00</span>
+
+                <!-- Right Column: Simulation & History -->
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
+                    <div class="flex-grow flex flex-col">
+                        <!-- Mode Toggles -->
+                        <div class="flex items-center justify-center space-x-3 mb-4 bg-[#dfc9ad]/10 border border-[#dfc9ad]/20 rounded-lg p-2">
+                            <label for="devModeToggle" class="text-sm font-medium text-[#dfc9ad]">Developer Mode</label>
+                            <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="devModeToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-gray-700 border-4 border-gray-700 appearance-none cursor-pointer"/>
+                                <label for="devModeToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div id="dev-mode-controls" class="hidden mb-4 space-y-2">
+                            <label for="manualMissInput" class="block text-sm font-medium text-gray-300">Manual Miss Distance (ft)</label>
+                            <input type="number" id="manualMissInput" value="10" min="0" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#dfc9ad] focus:border-[#dfc9ad]">
+                        </div>
+
+                        <button id="hit-ball-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600 disabled:shadow-none" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
+                            Hit Ball & Simulate
+                        </button>
+                        <div class="text-center mt-4 flex-grow flex flex-col justify-center">
+                            <h2 class="text-lg font-semibold text-gray-200">Shot Outcome <span id="shot-batch-status" class="text-xs text-gray-400 font-normal"></span></h2>
+                            <div class="w-full aspect-square max-w-[280px] mx-auto rounded-full flex items-center justify-center relative my-2" style="background: radial-gradient(circle, rgba(96, 76, 156, 0.2) 0%, rgba(73, 59, 124, 0.6) 70%);">
+                                <canvas id="shot-visualizer" width="280" height="280"></canvas>
+                            </div>
+                            <div id="results" class="w-full max-w-sm mx-auto space-y-2 pt-2 text-sm bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                                <p class="text-gray-400">Set your skill, wager, and select a hole to begin.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex justify-between text-sm text-gray-400">
-                        <span>Money Won:</span>
-                        <span id="totalWon" class="font-semibold text-white">$0.00</span>
-                    </div>
-                    <div class="flex justify-between text-sm font-bold mt-1 pt-1 border-t border-gray-700">
-                        <span class="text-gray-200">Net Gain/Loss:</span>
-                        <span id="netTotal" class="font-semibold">$0.00</span>
-                    </div>
-                    <div class="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-700/50">
-                        <span>Set House Edge (Hole):</span>
-                        <span id="setHouseEdge" class="font-semibold">0.0%</span>
-                    </div>
-                    <div class="flex justify-between text-xs text-gray-500">
-                        <span>Current House Edge (Session):</span>
-                        <span id="calculatedHouseEdge" class="font-semibold">0.0%</span>
-                    </div>
-                    <div class="flex space-x-3 mt-3">
-                        <button id="reset-skill-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-lavender);">Reset Skill</button>
-                        <button id="reset-session-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-rose-copper);">Reset Session</button>
+                    
+                    <!-- Session Tracker -->
+                    <div class="w-full pt-4 mt-4 border-t border-gray-700 space-y-2 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <h2 class="text-base font-semibold text-center text-gray-200 mb-2">Session Tracker</h2>
+                        <div class="flex justify-between text-sm text-gray-400">
+                            <span>Money Wagered:</span>
+                            <span id="totalWagered" class="font-semibold text-white">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-400">
+                            <span>Money Won:</span>
+                            <span id="totalWon" class="font-semibold text-white">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-bold mt-1 pt-1 border-t border-gray-700">
+                            <span class="text-gray-200">Net Gain/Loss:</span>
+                            <span id="netTotal" class="font-semibold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-700/50">
+                            <span>Set House Edge (Hole):</span>
+                            <span id="setHouseEdge" class="font-semibold">0.0%</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Current House Edge (Session):</span>
+                            <span id="calculatedHouseEdge" class="font-semibold">0.0%</span>
+                        </div>
+                        <div class="flex space-x-3 mt-3">
+                            <button id="reset-skill-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-lavender);">Reset Skill</button>
+                            <button id="reset-session-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-rose-copper);">Reset Session</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- House Profit Simulator Page -->
+        <div id="house-simulator-page" class="hidden">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Left Column: House Sim Controls -->
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
+                    <h2 class="text-xl font-bold text-center text-white">Venue Simulation Parameters</h2>
+                    
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-4">
+                        <div>
+                            <label for="numBays" class="block text-sm font-medium text-gray-300 mb-2">Number of Hitting Bays</label>
+                            <input type="number" id="numBays" value="50" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                        <div>
+                            <label for="simHours" class="block text-sm font-medium text-gray-300 mb-2">Simulation Duration (Hours)</label>
+                            <input type="number" id="simHours" value="8" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                        <div>
+                            <label for="shotsPerHour" class="block text-sm font-medium text-gray-300 mb-2">Average Shots per Hour (per Bay)</label>
+                            <input type="number" id="shotsPerHour" value="100" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        </div>
+                    </div>
+
+                    <button id="run-house-sim-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
+                        Run Simulation
+                    </button>
+                    <div id="house-sim-progress" class="hidden text-center text-sm text-tan-300">
+                        <p>Simulating... <span id="progress-text"></span></p>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                            <div id="progress-bar" class="progress-bar-fill h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: House Sim Results -->
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
+                    <div id="house-results-container" class="hidden">
+                        <h2 class="text-xl font-bold text-center text-white mb-4">Simulation Results</h2>
+                        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
+                             <div class="flex justify-between text-sm text-gray-400">
+                                <span>Total Handle (Wagered):</span>
+                                <span id="houseTotalWagered" class="font-semibold text-white">$0.00</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-400">
+                                <span>Total Payouts:</span>
+                                <span id="houseTotalPayouts" class="font-semibold text-white">$0.00</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-700">
+                                <span class="text-white">Net House Profit:</span>
+                                <span id="houseNetProfit" class="text-[#9e8cb4]">$0.00</span>
+                            </div>
+                             <div class="flex justify-between text-sm font-bold mt-1">
+                                <span class="text-white">Hold Percentage:</span>
+                                <span id="houseHoldPercent" class="text-[#9e8cb4]">0.00%</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 mt-4">
+                             <h3 class="text-base font-semibold text-center mb-2 text-gray-200">Profit Over Time</h3>
+                             <div class="relative h-56">
+                                 <canvas id="house-profit-chart"></canvas>
+                             </div>
+                        </div>
+                    </div>
+                     <div id="house-initial-message" class="flex items-center justify-center h-full">
+                        <p class="text-gray-500">Set parameters and run simulation to see results.</p>
+                    </div>
+                </div>
+            </div>
+             <!-- NEW: Heatmap Visualization -->
+            <div id="heatmap-container" class="hidden md:col-span-2 bg-gray-900 border border-gray-700 rounded-xl p-5">
+                <h2 class="text-xl font-bold text-center text-white mb-4">Profitability Heatmap (Hold % by Skill vs. Difficulty)</h2>
+                <div class="relative h-96">
+                    <canvas id="heatmap-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -222,6 +315,8 @@
         let selectedHoleId = 4;
         let payoutChartInstance = null;
         let pmaxHistoryChartInstance = null;
+        let houseProfitChartInstance = null;
+        let heatmapChartInstance = null;
         let lastShotData = null;
         let totalWagered = 0;
         let totalWon = 0;
@@ -232,6 +327,12 @@
         const textColor = 'rgba(223, 201, 173, 0.8)';
 
         // --- DOM ELEMENTS ---
+        const playerSimPage = document.getElementById('player-simulator-page');
+        const houseSimPage = document.getElementById('house-simulator-page');
+        const playerSimBtn = document.getElementById('player-sim-btn');
+        const houseSimBtn = document.getElementById('house-sim-btn');
+
+        // Player Sim Elements
         const handicapSlider = document.getElementById('handicap');
         const handicapValue = document.getElementById('handicapValue');
         const dispersionValue = document.getElementById('dispersionValue');
@@ -257,6 +358,25 @@
         const devModeToggle = document.getElementById('devModeToggle');
         const devModeControls = document.getElementById('dev-mode-controls');
         const manualMissInput = document.getElementById('manualMissInput');
+
+        // House Sim Elements
+        const runHouseSimBtn = document.getElementById('run-house-sim-btn');
+        const numBaysInput = document.getElementById('numBays');
+        const simHoursInput = document.getElementById('simHours');
+        const shotsPerHourInput = document.getElementById('shotsPerHour');
+        const houseResultsContainer = document.getElementById('house-results-container');
+        const houseInitialMessage = document.getElementById('house-initial-message');
+        const houseTotalWageredEl = document.getElementById('houseTotalWagered');
+        const houseTotalPayoutsEl = document.getElementById('houseTotalPayouts');
+        const houseNetProfitEl = document.getElementById('houseNetProfit');
+        const houseHoldPercentEl = document.getElementById('houseHoldPercent');
+        const houseProfitChartCanvas = document.getElementById('house-profit-chart');
+        const houseSimProgress = document.getElementById('house-sim-progress');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const heatmapContainer = document.getElementById('heatmap-container');
+        const heatmapCanvas = document.getElementById('heatmap-chart');
+
 
         // --- CORE MATH & ML FUNCTIONS ---
         function calculateInitialDispersion(handicap, distanceYds) {
@@ -368,7 +488,10 @@
             shotBatchStatusEl.textContent = `(Shot ${holeState.shot_batch.length + 1} of ${BATCH_SIZE})`;
             
             const hole = holeData.find(h => h.id === selectedHoleId);
-            drawTarget(hole.d_max, currentDispersion);
+            const p_max = calculatePmax(currentDispersion, hole);
+            const breakeven = hole.d_max * (1 - Math.pow(p_max, -1/hole.k));
+            
+            drawTarget(hole.d_max, currentDispersion, breakeven);
             updateConfidenceUI(holeState);
         }
         
@@ -404,19 +527,33 @@
             }
         }
 
-        function drawTarget(d_max, currentDispersion) {
+        function drawTarget(d_max, currentDispersion, breakeven) {
             const center = shotCanvas.width / 2;
+            const maxRadiusPx = center * 0.95;
             shotCtx.clearRect(0, 0, shotCanvas.width, shotCanvas.height);
             if (currentDispersion) {
                 drawProbabilityDensity(currentDispersion, d_max);
             }
             for(let i = 1; i <= 4; i++) {
                 shotCtx.beginPath();
-                shotCtx.arc(center, center, (center * 0.95) * (i/4), 0, 2 * Math.PI);
+                shotCtx.arc(center, center, maxRadiusPx * (i/4), 0, 2 * Math.PI);
                 shotCtx.strokeStyle = `rgba(223, 201, 173, 0.2)`;
                 shotCtx.lineWidth = 1;
                 shotCtx.stroke();
             }
+            
+            // Draw Breakeven Radius
+            if (breakeven && breakeven > 0) {
+                const breakevenRadiusPx = (breakeven / d_max) * maxRadiusPx;
+                shotCtx.beginPath();
+                shotCtx.arc(center, center, breakevenRadiusPx, 0, 2 * Math.PI);
+                shotCtx.strokeStyle = `rgba(126, 102, 73, 1)`; // Dark Gold
+                shotCtx.lineWidth = 2;
+                shotCtx.setLineDash([5, 5]);
+                shotCtx.stroke();
+                shotCtx.setLineDash([]); // Reset dash
+            }
+
             shotCtx.beginPath();
             shotCtx.arc(center, center, 4, 0, 2 * Math.PI);
             shotCtx.fillStyle = brandTan;
@@ -489,6 +626,88 @@
             });
         }
 
+        function initHouseProfitChart() {
+            const ctx = houseProfitChartCanvas.getContext('2d');
+            const specificOptions = JSON.parse(JSON.stringify(chartOptions));
+            specificOptions.scales.x.title.text = 'Time (Hours)';
+            specificOptions.scales.y.title.text = 'Cumulative Profit ($)';
+            specificOptions.scales.y.beginAtZero = true;
+            houseProfitChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Profit', data: [], borderColor: brandBrightPurple, backgroundColor: 'rgba(96, 76, 156, 0.2)', fill: true, tension: 0.1 }] },
+                options: specificOptions
+            });
+        }
+
+        function initHeatmapChart() {
+            const ctx = heatmapCanvas.getContext('2d');
+            heatmapChartInstance = new Chart(ctx, {
+                type: 'matrix',
+                data: {
+                    datasets: [{
+                        label: 'Hold %',
+                        data: [],
+                        backgroundColor(ctx) {
+                            const dataPoint = ctx.dataset.data[ctx.dataIndex];
+                            if (!dataPoint) {
+                                return 'rgba(255, 255, 255, 0.05)';
+                            }
+                            const value = dataPoint.v;
+                            if (value === null || typeof value === 'undefined') {
+                                return 'rgba(255, 255, 255, 0.05)';
+                            }
+
+                            if (value < 0) {
+                                // Negative hold (loss), use Rose Copper
+                                const alpha = Math.abs(value) / 10; // Normalize from 0% to -10% loss
+                                return `rgba(172, 124, 108, ${Math.max(0.1, Math.min(1, alpha))})`; // Rose Copper
+                            } else {
+                                // Positive hold (profit), use Deep Purple
+                                const alpha = (value - 5) / 15; // Normalize from 5% to 20% hold
+                                return `rgba(73, 59, 124, ${Math.max(0.1, Math.min(1, alpha))})`; // Deep Purple
+                            }
+                        },
+                        borderColor: 'rgba(223, 201, 173, 0.1)',
+                        borderWidth: 1,
+                        width: ({chart}) => (chart.chartArea || {}).width / 7 - 1,
+                        height: ({chart}) => (chart.chartArea || {}).height / 8 - 1,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: false,
+                        tooltip: {
+                            callbacks: {
+                                title: () => '',
+                                label: (ctx) => {
+                                    const item = ctx.dataset.data[ctx.dataIndex];
+                                    return `HCP ${item.x}: ${item.y}yds - Hold: ${item.v.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'category',
+                            labels: ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30+'],
+                            title: { display: true, text: 'Player Handicap', color: textColor },
+                            ticks: { color: textColor },
+                            grid: { display: false }
+                        },
+                        y: {
+                            type: 'category',
+                            labels: holeData.map(h => `${h.dist}yd`),
+                            title: { display: true, text: 'Target Distance', color: textColor },
+                            ticks: { color: textColor },
+                            grid: { display: false },
+                            offset: true
+                        }
+                    }
+                }
+            });
+        }
+
         function updatePayoutChart() {
             if (!payoutChartInstance || !playerState.kalmanFilters[selectedHoleId]) return;
             const hole = holeData.find(h => h.id === selectedHoleId);
@@ -553,7 +772,7 @@
 
         // --- EVENT HANDLERS & INITIALIZATION ---
         function calculateVariance(batch) {
-            if (batch.length < 2) return 0; // Variance is 0 for a single shot
+            if (batch.length < 2) return 0;
             const mean = batch.reduce((sum, shot) => sum + shot.miss, 0) / batch.length;
             const squaredDiffs = batch.map(shot => Math.pow(shot.miss - mean, 2));
             return squaredDiffs.reduce((sum, val) => sum + val, 0) / batch.length;
@@ -567,10 +786,8 @@
             const weightedAverageMiss = weightedSumOfMisses / totalWagerInBatch;
             const unbiasedMeasurement = weightedAverageMiss / Math.sqrt(Math.PI / 2);
             
-            // --- DYNAMIC MEASUREMENT NOISE ---
             const batchVariance = calculateVariance(batch);
             const baseMeasurementNoise = 500.0;
-            // Increase noise based on how inconsistent the player was in that batch
             const dynamicMeasurementNoise = baseMeasurementNoise + batchVariance * 10; 
 
             const updatedKalmanState = kalmanUpdate(holeState, unbiasedMeasurement, dynamicMeasurementNoise);
@@ -644,11 +861,13 @@
                     holeState.shot_batch = [];
                 }
             }
+            
+            const breakeven = hole.d_max * (1 - Math.pow(p_max, -1/hole.k));
 
             resultsDiv.innerHTML = `
                 <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-left">
                     <p class="text-gray-400">Miss Distance:</p><p class="font-semibold text-white text-right">${missDistance.toFixed(2)} ft</p>
-                    <p class="text-gray-400">Your P_max:</p><p class="font-semibold text-white text-right">${p_max.toFixed(2)}x</p>
+                    <p class="text-gray-400">Breakeven Radius:</p><p class="font-semibold text-white text-right">${breakeven.toFixed(2)} ft</p>
                     <p class="text-gray-400">Multiplier:</p><p class="font-semibold text-white text-right">${multiplier.toFixed(2)}x</p>
                 </div>
                 <div class="mt-2 pt-2 border-t border-gray-700">
@@ -665,7 +884,133 @@
             hitBallBtn.textContent = 'Hit Ball & Simulate';
         }
 
+        // --- HOUSE SIMULATION LOGIC ---
+        async function runHouseSimulation() {
+            runHouseSimBtn.disabled = true;
+            runHouseSimBtn.textContent = 'Simulating...';
+            houseSimProgress.classList.remove('hidden');
+            houseInitialMessage.classList.add('hidden');
+            houseResultsContainer.classList.add('hidden');
+            heatmapContainer.classList.add('hidden');
+
+            const numBays = parseInt(numBaysInput.value);
+            const simHours = parseInt(simHoursInput.value);
+            const shotsPerHour = parseInt(shotsPerHourInput.value);
+            const totalShots = numBays * simHours * shotsPerHour;
+            const updateInterval = Math.max(1, Math.floor(totalShots / 100));
+            
+            let houseTotalWagered = 0;
+            let houseTotalPayouts = 0;
+            let profitData = [];
+            let labelData = [];
+            
+            const handicapBins = 7;
+            const handicapBinSize = 30 / (handicapBins -1);
+            let heatmapData = Array(holeData.length).fill(0).map(() => Array(handicapBins).fill(0).map(() => ({wagered: 0, paid: 0})));
+
+            let virtualPlayers = [];
+            for (let i = 0; i < numBays; i++) {
+                const handicap = Math.floor(Math.random() * 31);
+                let player = { handicap, kalmanFilters: {} };
+                holeData.forEach(hole => {
+                    const initialDispersion = calculateInitialDispersion(handicap, hole.dist);
+                    player.kalmanFilters[hole.id] = {
+                        initialEstimate: initialDispersion,
+                        estimate: initialDispersion,
+                        errorCovariance: 1000,
+                        p_max_history: [],
+                        shot_batch: []
+                    };
+                });
+                virtualPlayers.push(player);
+            }
+
+            for (let i = 0; i < totalShots; i++) {
+                const player = virtualPlayers[i % numBays];
+                const holeIndex = Math.floor(Math.random() * holeData.length);
+                const hole = holeData[holeIndex];
+                const wager = Math.floor(Math.random() * 20) + 1;
+
+                let holeState = player.kalmanFilters[hole.id];
+                const s = holeState.estimate;
+                const p_max = calculatePmax(s, hole);
+                const missDistance = simulateShot(s);
+                
+                let payout = 0;
+                if (missDistance <= hole.d_max) {
+                    payout = wager * (p_max * Math.pow(1 - missDistance / hole.d_max, hole.k));
+                }
+
+                houseTotalWagered += wager;
+                houseTotalPayouts += payout;
+
+                const handicapBin = Math.min(handicapBins - 1, Math.floor(player.handicap / handicapBinSize));
+                heatmapData[holeIndex][handicapBin].wagered += wager;
+                heatmapData[holeIndex][handicapBin].paid += payout;
+
+                const missForSkillUpdate = Math.min(missDistance, hole.d_max);
+                holeState.shot_batch.push({ miss: missForSkillUpdate, wager: wager });
+                if (holeState.shot_batch.length >= BATCH_SIZE) {
+                    player.kalmanFilters[hole.id] = processBatch(holeState, holeState.shot_batch, p_max);
+                    holeState.shot_batch = [];
+                }
+
+                if (i % updateInterval === 0 || i === totalShots - 1) {
+                    const percentComplete = ((i + 1) / totalShots) * 100;
+                    progressText.textContent = `${Math.round(percentComplete)}%`;
+                    progressBar.style.width = `${percentComplete}%`;
+                    
+                    profitData.push(houseTotalWagered - houseTotalPayouts);
+                    labelData.push(((i / totalShots) * simHours).toFixed(1));
+
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+            }
+
+            houseTotalWageredEl.textContent = `$${houseTotalWagered.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            houseTotalPayoutsEl.textContent = `$${houseTotalPayouts.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            houseNetProfitEl.textContent = `$${(houseTotalWagered - houseTotalPayouts).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            houseHoldPercentEl.textContent = `${((houseTotalWagered - houseTotalPayouts) / houseTotalWagered * 100).toFixed(2)}%`;
+            
+            houseProfitChartInstance.data.labels = labelData;
+            houseProfitChartInstance.data.datasets[0].data = profitData;
+            houseProfitChartInstance.update();
+
+            const finalHeatmapData = [];
+            for (let y = 0; y < holeData.length; y++) {
+                for (let x = 0; x < handicapBins; x++) {
+                    const bin = heatmapData[y][x];
+                    const hold = bin.wagered > 0 ? ((bin.wagered - bin.paid) / bin.wagered) * 100 : 0;
+                    finalHeatmapData.push({x: heatmapChartInstance.options.scales.x.labels[x], y: heatmapChartInstance.options.scales.y.labels[y], v: hold});
+                }
+            }
+            heatmapChartInstance.data.datasets[0].data = finalHeatmapData;
+            heatmapChartInstance.update();
+
+            houseResultsContainer.classList.remove('hidden');
+            heatmapContainer.classList.remove('hidden');
+            houseSimProgress.classList.add('hidden');
+            runHouseSimBtn.disabled = false;
+            runHouseSimBtn.textContent = 'Run Simulation';
+        }
+
+
         function init() {
+            // Page Toggling
+            playerSimBtn.addEventListener('click', () => {
+                playerSimPage.classList.remove('hidden');
+                houseSimPage.classList.add('hidden');
+                playerSimBtn.classList.add('active');
+                houseSimBtn.classList.remove('active');
+            });
+            houseSimBtn.addEventListener('click', () => {
+                playerSimPage.classList.add('hidden');
+                houseSimPage.classList.remove('hidden');
+                playerSimBtn.classList.remove('active');
+                houseSimBtn.classList.add('active');
+            });
+
+            // Player Sim Init
             const hitBtn = document.getElementById('hit-ball-btn');
             hitBtn.addEventListener('mouseover', () => hitBtn.style.backgroundColor = 'var(--brand-deep-purple)');
             hitBtn.addEventListener('mouseout', () => hitBtn.style.backgroundColor = 'var(--brand-bright-purple)');
@@ -712,12 +1057,15 @@
             initPayoutChart();
             initPmaxHistoryChart();
             loadState();
-            
             updateAllDisplays();
+
+            // House Sim Init
+            initHouseProfitChart();
+            initHeatmapChart();
+            runHouseSimBtn.addEventListener('click', runHouseSimulation);
         }
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
-
