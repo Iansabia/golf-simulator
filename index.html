@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Continuum Golf Wagering System</title>
+    <title>Continuum Golf v2 - Advanced Wagering Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1"></script>
@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000000; /* Black */
+            background-color: #000000;
             --brand-deep-purple: #493b7c;
             --brand-bright-purple: #604c9c;
             --brand-tan: #dfc9ad;
@@ -22,57 +22,69 @@
             --brand-light-gray: #374151; /* gray-700 */
         }
         .slider-thumb::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
+            -webkit-appearance: none; appearance: none;
+            width: 24px; height: 24px;
             background: var(--brand-bright-purple);
-            cursor: pointer;
-            border-radius: 50%;
+            cursor: pointer; border-radius: 50%;
             border: 4px solid var(--brand-dark-gray);
         }
         .slider-thumb::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             background: var(--brand-bright-purple);
-            cursor: pointer;
-            border-radius: 50%;
+            cursor: pointer; border-radius: 50%;
             border: 4px solid var(--brand-dark-gray);
         }
         .hole-btn.active {
-            background-color: var(--brand-bright-purple);
-            color: white;
+            background-color: var(--brand-bright-purple); color: white;
             border-color: var(--brand-bright-purple);
             box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);
         }
         .progress-bar-fill {
             background-color: var(--brand-dark-gold);
-            transition: width 0.5s ease-in-out;
+            transition: width 0.3s ease-in-out;
         }
-        /* Toggle Switch Styles */
-        .toggle-checkbox {
-            transition: transform 0.2s ease-in-out;
-        }
-        .toggle-checkbox:checked {
-            transform: translateX(1rem);
-            border-color: var(--brand-tan);
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: var(--brand-bright-purple);
-        }
-        .page-toggle-btn {
-            transition: all 0.2s ease-in-out;
-        }
+        .toggle-checkbox { transition: transform 0.2s ease-in-out; }
+        .toggle-checkbox:checked { transform: translateX(1rem); border-color: var(--brand-tan); }
+        .toggle-checkbox:checked + .toggle-label { background-color: var(--brand-bright-purple); }
+        .page-toggle-btn { transition: all 0.2s ease-in-out; }
         .page-toggle-btn.active {
-            background-color: var(--brand-bright-purple);
-            color: white;
+            background-color: var(--brand-bright-purple); color: white;
             box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);
         }
-        /* Custom scrollbar for aesthetics */
+        /* Tooltip styles for info icons */
+        .info-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .info-tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--brand-dark-gray);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            border: 1px solid var(--brand-light-gray);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .info-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #111827; } /* gray-900 */
+        ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: var(--brand-light-gray); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4B5563; } /* gray-600 */
+        ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
     </style>
 </head>
 <body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
@@ -80,14 +92,14 @@
     <div class="w-full max-w-7xl bg-black border border-gray-800 rounded-2xl shadow-2xl shadow-[rgba(73,59,124,0.2)] p-6 space-y-6">
         
         <header class="text-center">
-            <h1 class="text-4xl font-extrabold text-white">Continuum G<span class="text-[#dfc9ad]">σ</span>lf</h1>
-            <p class="text-gray-400 text-sm mt-2">Rayleigh Distribution Payouts with Kalman Filter-Based RTP Calibration</p>
+            <h1 class="text-4xl font-extrabold text-white">Continuum G<span class="text-[#dfc9ad]">σ</span>lf v2</h1>
+            <p class="text-gray-400 text-sm mt-2">Enhanced Simulation with Web Workers & Advanced Player Modeling</p>
         </header>
 
         <!-- Page Toggles -->
         <div class="flex justify-center border-b border-gray-700">
             <button id="player-sim-btn" class="page-toggle-btn active py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Continuum™</button>
-            <button id="house-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">House Profit</button>
+            <button id="house-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Venue Profit</button>
             <button id="rake-sim-btn" class="page-toggle-btn py-2 px-6 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-white hover:border-gray-500">Player Vs. Player</button>
         </div>
 
@@ -99,27 +111,34 @@
                     
                     <!-- Player Skill Card -->
                     <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                        <label for="handicap" class="block text-sm font-medium text-gray-300 mb-2">
-                            Player Skill Profile
-                        </label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Player Skill Profile</label>
                         <div class="flex justify-between items-center text-sm mb-2">
                             <span>Starting Handicap:</span>
                             <span id="handicapValue" class="font-bold text-[#9e8cb4] text-lg">15</span>
                         </div>
                         <input type="range" id="handicap" min="0" max="30" value="15" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb">
                         <div class="flex justify-between items-center text-xs text-gray-400 mt-3">
-                            <span>Dispersion (Current / Original):</span>
+                            <span>Club Category:</span>
+                            <span id="clubCategoryValue" class="font-bold text-white">Mid-Irons</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-400 mt-1">
+                            <span>Dispersion (Current / Original): 
+                                <span class="info-tooltip text-gray-500">[?]
+                                    <span class="tooltip-text">A measure of shot consistency ($σ$). A lower value means shots are more tightly grouped. It's updated by the Kalman Filter based on performance.</span>
+                                </span>
+                            </span>
                             <span><span id="dispersionValue" class="font-bold text-white"></span> / <span id="originalDispersionValue" class="text-gray-500"></span></span>
                         </div>
-                        <!-- Skill Confidence Meter -->
                         <div class="mt-3">
                             <div class="flex justify-between items-center text-xs text-gray-400 mb-1">
-                                <span>Skill Confidence:</span>
+                                <span>Skill Confidence:
+                                    <span class="info-tooltip text-gray-500">[?]
+                                        <span class="tooltip-text">How certain the model is about your skill with this club type. Increases with more shots, leading to a more stable payout curve.</span>
+                                    </span>
+                                </span>
                                 <span id="confidence-text">0%</span>
                             </div>
-                            <div class="w-full bg-gray-700 rounded-full h-2">
-                                <div id="confidence-bar" class="progress-bar-fill h-2 rounded-full" style="width: 0%"></div>
-                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2"><div id="confidence-bar" class="progress-bar-fill h-2 rounded-full" style="width: 0%"></div></div>
                         </div>
                     </div>
 
@@ -132,9 +151,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Target Hole</label>
-                                <div id="hole-selection" class="grid grid-cols-4 gap-2">
-                                    <!-- Hole buttons will be injected here by JS -->
-                                </div>
+                                <div id="hole-selection" class="grid grid-cols-4 gap-2"></div>
                             </div>
                         </div>
                     </div>
@@ -142,16 +159,12 @@
                     <!-- Charts -->
                     <div class="grid grid-cols-1 gap-4 pt-2">
                         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-                             <h2 class="text-base font-semibold text-center mb-2 text-gray-200">Personalized Payout Curve</h2>
-                             <div class="relative h-40">
-                                 <canvas id="payout-chart"></canvas>
-                             </div>
+                           <h2 class="text-base font-semibold text-center mb-2 text-gray-200">Personalized Payout Curve</h2>
+                           <div class="relative h-40"><canvas id="payout-chart"></canvas></div>
                         </div>
                         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
                             <h2 class="text-base font-semibold text-center mb-2 text-gray-200">P_max History</h2>
-                             <div class="relative h-40">
-                                 <canvas id="pmax-history-chart"></canvas>
-                             </div>
+                            <div class="relative h-40"><canvas id="pmax-history-chart"></canvas></div>
                         </div>
                     </div>
                 </div>
@@ -169,10 +182,10 @@
                         </div>
                         <div id="dev-mode-controls" class="hidden mb-4 space-y-2">
                             <label for="manualMissInput" class="block text-sm font-medium text-gray-300">Manual Miss Distance (ft)</label>
-                            <input type="number" id="manualMissInput" value="10" min="0" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white placeholder-gray-400 focus:ring-[#dfc9ad] focus:border-[#dfc9ad]">
+                            <input type="number" id="manualMissInput" value="10" min="0" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white">
                         </div>
 
-                        <button id="hit-ball-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600 disabled:shadow-none" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
+                        <button id="hit-ball-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
                             Hit Ball & Simulate
                         </button>
                         <div class="text-center mt-4 flex-grow flex flex-col justify-center">
@@ -189,26 +202,11 @@
                     <!-- Session Tracker -->
                     <div class="w-full pt-4 mt-4 border-t border-gray-700 space-y-2 bg-gray-800 p-4 rounded-lg border border-gray-700">
                         <h2 class="text-base font-semibold text-center text-gray-200 mb-2">Session Tracker</h2>
-                        <div class="flex justify-between text-sm text-gray-400">
-                            <span>Money Wagered:</span>
-                            <span id="totalWagered" class="font-semibold text-white">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-sm text-gray-400">
-                            <span>Money Won:</span>
-                            <span id="totalWon" class="font-semibold text-white">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-sm font-bold mt-1 pt-1 border-t border-gray-700">
-                            <span class="text-gray-200">Net Gain/Loss:</span>
-                            <span id="netTotal" class="font-semibold">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-700/50">
-                            <span>Set House Edge (Hole):</span>
-                            <span id="setHouseEdge" class="font-semibold">0.0%</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500">
-                            <span>Current House Edge (Session):</span>
-                            <span id="calculatedHouseEdge" class="font-semibold">0.0%</span>
-                        </div>
+                        <div class="flex justify-between text-sm text-gray-400"><span>Money Wagered:</span><span id="totalWagered" class="font-semibold text-white">$0.00</span></div>
+                        <div class="flex justify-between text-sm text-gray-400"><span>Money Won:</span><span id="totalWon" class="font-semibold text-white">$0.00</span></div>
+                        <div class="flex justify-between text-sm font-bold mt-1 pt-1 border-t border-gray-700"><span class="text-gray-200">Net Gain/Loss:</span><span id="netTotal" class="font-semibold">$0.00</span></div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-700/50"><span>Set House Edge (Hole):</span><span id="setHouseEdge" class="font-semibold">0.0%</span></div>
+                        <div class="flex justify-between text-xs text-gray-500"><span>Current House Edge (Session):</span><span id="calculatedHouseEdge" class="font-semibold">0.0%</span></div>
                         <div class="flex space-x-3 mt-3">
                             <button id="reset-skill-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-lavender);">Reset Skill</button>
                             <button id="reset-session-btn" class="w-full text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-xs" style="background-color: var(--brand-rose-copper);">Reset Session</button>
@@ -220,150 +218,119 @@
 
         <!-- House Profit Simulator Page -->
         <div id="house-simulator-page" class="hidden">
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid lg:grid-cols-2 gap-6">
                 <!-- Left Column: House Sim Controls -->
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
                     <h2 class="text-xl font-bold text-center text-white">Venue Simulation Parameters</h2>
-                    
                     <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-4">
-                        <div>
-                            <label for="numBays" class="block text-sm font-medium text-gray-300 mb-2">Number of Hitting Bays</label>
-                            <input type="number" id="numBays" value="50" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label for="numBays" class="block text-sm font-medium text-gray-300 mb-1">Bays</label>
+                                <input type="number" id="numBays" value="50" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
+                            </div>
+                            <div>
+                                <label for="simHours" class="block text-sm font-medium text-gray-300 mb-1">Hours</label>
+                                <input type="number" id="simHours" value="8" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
+                            </div>
+                            <div>
+                                <label for="shotsPerHour" class="block text-sm font-medium text-gray-300 mb-1">Shots/Hr</label>
+                                <input type="number" id="shotsPerHour" value="100" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
+                            </div>
                         </div>
                         <div>
-                            <label for="simHours" class="block text-sm font-medium text-gray-300 mb-2">Simulation Duration (Hours)</label>
-                            <input type="number" id="simHours" value="8" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
-                        </div>
-                        <div>
-                            <label for="shotsPerHour" class="block text-sm font-medium text-gray-300 mb-2">Average Shots per Hour (per Bay)</label>
-                            <input type="number" id="shotsPerHour" value="100" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                             <label for="playerArchetype" class="block text-sm font-medium text-gray-300 mb-2">Player Skill Distribution</label>
+                             <select id="playerArchetype" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
+                                 <option value="uniform">Uniform Random (All Skills Equal)</option>
+                                 <option value="bell_curve_15">Bell Curve (Centered at 15 HCP)</option>
+                                 <option value="mostly_beginners">Mostly Beginners (Skewed High HCP)</option>
+                                 <option value="mostly_experts">Mostly Experts (Skewed Low HCP)</option>
+                             </select>
                         </div>
                     </div>
-
-                    <button id="run-house-sim-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
-                        Run Simulation
-                    </button>
-                    <div id="house-sim-progress" class="hidden text-center text-sm text-tan-300">
-                        <p>Simulating... <span id="progress-text"></span></p>
-                        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
-                            <div id="progress-bar" class="progress-bar-fill h-2.5 rounded-full" style="width: 0%"></div>
-                        </div>
+                    <button id="run-house-sim-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">Run Simulation</button>
+                    <div id="house-sim-progress" class="hidden text-center text-sm">
+                        <p>Simulating on background thread... <span id="progress-text" class="font-bold text-tan-300"></span></p>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div id="progress-bar" class="progress-bar-fill h-2.5 rounded-full" style="width: 0%"></div></div>
                     </div>
                 </div>
 
                 <!-- Right Column: House Sim Results -->
-                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
                     <div id="house-results-container" class="hidden">
                         <h2 class="text-xl font-bold text-center text-white mb-4">Simulation Results</h2>
                         <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
-                             <div class="flex justify-between text-sm text-gray-400">
-                                <span>Total Handle (Wagered):</span>
-                                <span id="houseTotalWagered" class="font-semibold text-white">$0.00</span>
-                            </div>
-                            <div class="flex justify-between text-sm text-gray-400">
-                                <span>Total Payouts:</span>
-                                <span id="houseTotalPayouts" class="font-semibold text-white">$0.00</span>
-                            </div>
-                            <div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-700">
-                                <span class="text-white">Net House Profit:</span>
-                                <span id="houseNetProfit" class="text-[#9e8cb4]">$0.00</span>
-                            </div>
-                             <div class="flex justify-between text-sm font-bold mt-1">
-                                <span class="text-white">Hold Percentage:</span>
-                                <span id="houseHoldPercent" class="text-[#9e8cb4]">0.00%</span>
-                            </div>
+                            <div class="flex justify-between text-sm text-gray-400"><span>Total Handle (Wagered):</span><span id="houseTotalWagered" class="font-semibold text-white">$0.00</span></div>
+                            <div class="flex justify-between text-sm text-gray-400"><span>Total Payouts:</span><span id="houseTotalPayouts" class="font-semibold text-white">$0.00</span></div>
+                            <div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-700"><span class="text-white">Net House Profit:</span><span id="houseNetProfit" class="text-[#9e8cb4]">$0.00</span></div>
+                            <div class="flex justify-between text-sm font-bold mt-1"><span class="text-white">Hold Percentage:</span><span id="houseHoldPercent" class="text-[#9e8cb4]">0.00%</span></div>
                         </div>
                         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 mt-4">
-                             <h3 class="text-base font-semibold text-center mb-2 text-gray-200">Profit Over Time</h3>
-                             <div class="relative h-56">
-                                 <canvas id="house-profit-chart"></canvas>
-                             </div>
+                           <h3 class="text-base font-semibold text-center mb-2 text-gray-200">Profit Over Time</h3>
+                           <div class="relative h-56"><canvas id="house-profit-chart"></canvas></div>
                         </div>
                     </div>
-                     <div id="house-initial-message" class="flex items-center justify-center h-full">
-                        <p class="text-gray-500">Set parameters and run simulation to see results.</p>
-                    </div>
+                    <div id="house-initial-message" class="flex items-center justify-center h-full"><p class="text-gray-500">Set parameters and run simulation to see results.</p></div>
                 </div>
-            </div>
-             <!-- NEW: Heatmap Visualization -->
-            <div id="heatmap-container" class="hidden md:col-span-2 bg-gray-900 border border-gray-700 rounded-xl p-5">
-                <h2 class="text-xl font-bold text-center text-white mb-4">Profitability Heatmap (Hold % by Skill vs. Difficulty)</h2>
-                <div class="relative h-96">
-                    <canvas id="heatmap-chart"></canvas>
+
+                <!-- Bottom Full-Width Visualizations -->
+                <div id="heatmap-container" class="hidden lg:col-span-2 bg-gray-900 border border-gray-700 rounded-xl p-5">
+                    <h2 class="text-xl font-bold text-center text-white mb-4">Profitability Heatmap (Hold % by Skill vs. Difficulty)</h2>
+                    <div class="relative h-96"><canvas id="heatmap-chart"></canvas></div>
+                </div>
+                 <div id="payout-dist-container" class="hidden lg:col-span-2 bg-gray-900 border border-gray-700 rounded-xl p-5">
+                    <h2 class="text-xl font-bold text-center text-white mb-4">Payout Distribution</h2>
+                    <div class="relative h-80"><canvas id="payout-distribution-chart"></canvas></div>
                 </div>
             </div>
         </div>
         
-        <!-- Rake Competition Simulator Page -->
+        <!-- Rake Competition Simulator Page (Existing Code) -->
         <div id="rake-simulator-page" class="hidden">
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Left Column: Rake Sim Controls -->
+             <!-- This section remains the same as your original code -->
+             <div class="grid md:grid-cols-2 gap-6">
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-5">
                     <h2 class="text-xl font-bold text-center text-white">Competition Parameters</h2>
-                    
                     <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-4">
                         <div>
                             <label for="rakeGameMode" class="block text-sm font-medium text-gray-300 mb-2">Game Mode</label>
-                            <select id="rakeGameMode" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
-                                <option value="longest_drive">Longest Drive</option>
-                                <option value="closest_to_pin">Closest to the Pin</option>
-                            </select>
+                            <select id="rakeGameMode" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"><option value="longest_drive">Longest Drive</option><option value="closest_to_pin">Closest to the Pin</option></select>
                         </div>
                         <div id="rake-ctp-hole-container" class="hidden">
                             <label for="rakeCtpHole" class="block text-sm font-medium text-gray-300 mb-2">Target Hole (CTP)</label>
-                            <select id="rakeCtpHole" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
-                                <!-- Options populated by JS -->
-                            </select>
+                            <select id="rakeCtpHole" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"></select>
                         </div>
                         <div>
                             <label for="rakePayoutStructure" class="block text-sm font-medium text-gray-300 mb-2">Payout Structure</label>
-                            <select id="rakePayoutStructure" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
-                                <option value="winner_takes_all">Winner Takes All</option>
-                                <option value="top_3">Top 3 Paid (60/30/10)</option>
-                                <option value="top_2">Top 2 Paid (70/30)</option>
-                            </select>
+                            <select id="rakePayoutStructure" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"><option value="winner_takes_all">Winner Takes All</option><option value="top_3">Top 3 Paid (60/30/10)</option><option value="top_2">Top 2 Paid (70/30)</option></select>
                         </div>
                         <div>
                             <label for="rakeEntryFee" class="block text-sm font-medium text-gray-300 mb-2">Entry Fee ($)</label>
-                            <input type="number" id="rakeEntryFee" value="10" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                            <input type="number" id="rakeEntryFee" value="10" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
                         </div>
                         <div>
                             <label for="rakeNumPlayers" class="block text-sm font-medium text-gray-300 mb-2">Number of Players</label>
-                            <input type="number" id="rakeNumPlayers" value="100" min="2" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                            <input type="number" id="rakeNumPlayers" value="100" min="2" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
                         </div>
                         <div>
                             <label for="rakePercentage" class="block text-sm font-medium text-gray-300 mb-2">House Rake (%)</label>
-                            <input type="number" id="rakePercentage" value="10" min="0" max="100" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-[#604c9c] focus:border-[#604c9c]">
+                            <input type="number" id="rakePercentage" value="10" min="0" max="100" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white">
                         </div>
                     </div>
-
                     <div class="flex space-x-4">
-                        <button id="randomize-rake-btn" class="w-1/3 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg" style="background-color: var(--brand-dark-gold);">
-                            Randomize
-                        </button>
-                        <button id="run-rake-sim-btn" class="w-2/3 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">
-                            Simulate Competition
-                        </button>
+                        <button id="randomize-rake-btn" class="w-1/3 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg" style="background-color: var(--brand-dark-gold);">Randomize</button>
+                        <button id="run-rake-sim-btn" class="w-2/3 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg shadow-lg disabled:bg-gray-600" style="background-color: var(--brand-bright-purple); box-shadow: 0 0 15px rgba(96, 76, 156, 0.5);">Simulate</button>
                     </div>
                 </div>
-
-                <!-- Right Column: Rake Sim Results -->
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
                     <div id="rake-results-container" class="hidden">
                         <h2 class="text-xl font-bold text-center text-white mb-4">Competition Results</h2>
-                        <div id="rake-financial-summary" class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
-                             <!-- Payout info injected by JS -->
-                        </div>
+                        <div id="rake-financial-summary" class="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3"></div>
                         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 mt-4">
-                             <h3 class="text-base font-semibold text-center mb-2 text-gray-200">Top 10 Leaderboard</h3>
-                             <div class="relative h-80">
-                                 <canvas id="rake-leaderboard-chart"></canvas>
-                             </div>
+                            <h3 class="text-base font-semibold text-center mb-2 text-gray-200">Top 10 Leaderboard</h3>
+                            <div class="relative h-80"><canvas id="rake-leaderboard-chart"></canvas></div>
                         </div>
                     </div>
-                     <div id="rake-initial-message" class="flex items-center justify-center h-full">
-                        <p class="text-gray-500">Set parameters and simulate competition to see results.</p>
-                    </div>
+                    <div id="rake-initial-message" class="flex items-center justify-center h-full"><p class="text-gray-500">Set parameters and simulate.</p></div>
                 </div>
             </div>
         </div>
@@ -371,587 +338,562 @@
     </div>
 
     <script>
-        // --- DATA & CONFIGURATION ---
-        const holeData = [
-            { id: 1, dist: 75, d_max: 17.95, RTP: 0.86, k: 5.5 },
-            { id: 2, dist: 100, d_max: 25.69, RTP: 0.86, k: 5.5 },
-            { id: 3, dist: 125, d_max: 36.71, RTP: 0.88, k: 5.5 },
-            { id: 4, dist: 150, d_max: 47.58, RTP: 0.88, k: 6.0 },
-            { id: 5, dist: 175, d_max: 59.09, RTP: 0.88, k: 6.0 },
-            { id: 6, dist: 200, d_max: 73.58, RTP: 0.90, k: 6.5 },
-            { id: 7, dist: 225, d_max: 84.84, RTP: 0.90, k: 6.5 },
-            { id: 8, dist: 250, d_max: 101.14, RTP: 0.90, k: 6.5 },
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- CONFIGURATION & DATA ---
+        const CONFIG = {
+            // Kalman Filter Parameters
+            KALMAN_PROCESS_NOISE: 0.1,    // How much we expect skill to drift naturally between sessions.
+            KALMAN_BASE_MEASUREMENT_NOISE: 500.0, // Base uncertainty of a batch of shots.
+            // Player Simulation Parameters
+            PLAYER_SHOT_BATCH_SIZE: 5,
+            HIGH_STAKES_WAGER_MULTIPLIER: 10,
+            FAT_TAIL_PROBABILITY: 0.02, // 2% chance of a significant mishit
+            FAT_TAIL_MULTIPLIER: 3.0,   // How much worse a mishit is
+        };
+
+        const HOLE_DATA = [
+            { id: 1, dist: 75, d_max: 17.95, RTP: 0.86, k: 5.5, category: 'Wedge' },
+            { id: 2, dist: 100, d_max: 25.69, RTP: 0.86, k: 5.5, category: 'Wedge' },
+            { id: 3, dist: 125, d_max: 36.71, RTP: 0.88, k: 5.5, category: 'Wedge' },
+            { id: 4, dist: 150, d_max: 47.58, RTP: 0.88, k: 6.0, category: 'Mid-Iron' },
+            { id: 5, dist: 175, d_max: 59.09, RTP: 0.88, k: 6.0, category: 'Mid-Iron' },
+            { id: 6, dist: 200, d_max: 73.58, RTP: 0.90, k: 6.5, category: 'Long-Iron' },
+            { id: 7, dist: 225, d_max: 84.84, RTP: 0.90, k: 6.5, category: 'Long-Iron' },
+            { id: 8, dist: 250, d_max: 101.14, RTP: 0.90, k: 6.5, category: 'Long-Iron' },
         ];
-        const BATCH_SIZE = 5;
-        const WAGER_THRESHOLD_MULTIPLIER = 10;
-        
+        const CLUB_CATEGORIES = ['Wedge', 'Mid-Iron', 'Long-Iron'];
+
         // --- STATE MANAGEMENT ---
-        let playerState = { kalmanFilters: {} };
+        let player;
         let selectedHoleId = 4;
-        let payoutChartInstance = null;
-        let pmaxHistoryChartInstance = null;
-        let houseProfitChartInstance = null;
-        let heatmapChartInstance = null;
-        let rakeLeaderboardChartInstance = null;
         let lastShotData = null;
         let totalWagered = 0;
         let totalWon = 0;
-        const brandBrightPurple = '#604c9c';
-        const brandDarkGold = '#7e6649';
-        const brandTan = '#dfc9ad';
-        const brandRoseCopper = '#ac7c6c';
-        const textColor = 'rgba(223, 201, 173, 0.8)';
-
-        // --- DOM ELEMENTS ---
-        const playerSimPage = document.getElementById('player-simulator-page');
-        const houseSimPage = document.getElementById('house-simulator-page');
-        const rakeSimPage = document.getElementById('rake-simulator-page');
-        const playerSimBtn = document.getElementById('player-sim-btn');
-        const houseSimBtn = document.getElementById('house-sim-btn');
-        const rakeSimBtn = document.getElementById('rake-sim-btn');
-
-        // Player Sim Elements
-        const handicapSlider = document.getElementById('handicap');
-        const handicapValue = document.getElementById('handicapValue');
-        const dispersionValue = document.getElementById('dispersionValue');
-        const originalDispersionValue = document.getElementById('originalDispersionValue');
-        const confidenceBar = document.getElementById('confidence-bar');
-        const confidenceText = document.getElementById('confidence-text');
-        const wagerInput = document.getElementById('wager');
-        const hitBallBtn = document.getElementById('hit-ball-btn');
-        const resultsDiv = document.getElementById('results');
-        const holeSelectionDiv = document.getElementById('hole-selection');
-        const shotCanvas = document.getElementById('shot-visualizer');
-        const shotCtx = shotCanvas.getContext('2d');
-        const chartCanvas = document.getElementById('payout-chart');
-        const pmaxHistoryCanvas = document.getElementById('pmax-history-chart');
-        const totalWageredEl = document.getElementById('totalWagered');
-        const totalWonEl = document.getElementById('totalWon');
-        const netTotalEl = document.getElementById('netTotal');
-        const setHouseEdgeEl = document.getElementById('setHouseEdge');
-        const calculatedHouseEdgeEl = document.getElementById('calculatedHouseEdge');
-        const resetSkillBtn = document.getElementById('reset-skill-btn');
-        const resetSessionBtn = document.getElementById('reset-session-btn');
-        const shotBatchStatusEl = document.getElementById('shot-batch-status');
-        const devModeToggle = document.getElementById('devModeToggle');
-        const devModeControls = document.getElementById('dev-mode-controls');
-        const manualMissInput = document.getElementById('manualMissInput');
-
-        // House Sim Elements
-        const runHouseSimBtn = document.getElementById('run-house-sim-btn');
-        const numBaysInput = document.getElementById('numBays');
-        const simHoursInput = document.getElementById('simHours');
-        const shotsPerHourInput = document.getElementById('shotsPerHour');
-        const houseResultsContainer = document.getElementById('house-results-container');
-        const houseInitialMessage = document.getElementById('house-initial-message');
-        const houseTotalWageredEl = document.getElementById('houseTotalWagered');
-        const houseTotalPayoutsEl = document.getElementById('houseTotalPayouts');
-        const houseNetProfitEl = document.getElementById('houseNetProfit');
-        const houseHoldPercentEl = document.getElementById('houseHoldPercent');
-        const houseProfitChartCanvas = document.getElementById('house-profit-chart');
-        const houseSimProgress = document.getElementById('house-sim-progress');
-        const progressText = document.getElementById('progress-text');
-        const progressBar = document.getElementById('progress-bar');
-        const heatmapContainer = document.getElementById('heatmap-container');
-        const heatmapCanvas = document.getElementById('heatmap-chart');
-
-        // Rake Sim Elements
-        const runRakeSimBtn = document.getElementById('run-rake-sim-btn');
-        const randomizeRakeBtn = document.getElementById('randomize-rake-btn');
-        const rakeGameModeSelect = document.getElementById('rakeGameMode');
-        const rakeCtpHoleContainer = document.getElementById('rake-ctp-hole-container');
-        const rakeCtpHoleSelect = document.getElementById('rakeCtpHole');
-        const rakePayoutStructureSelect = document.getElementById('rakePayoutStructure');
-        const rakeEntryFeeInput = document.getElementById('rakeEntryFee');
-        const rakeNumPlayersInput = document.getElementById('rakeNumPlayers');
-        const rakePercentageInput = document.getElementById('rakePercentage');
-        const rakeResultsContainer = document.getElementById('rake-results-container');
-        const rakeInitialMessage = document.getElementById('rake-initial-message');
-        const rakeFinancialSummaryEl = document.getElementById('rake-financial-summary');
-        const rakeLeaderboardCanvas = document.getElementById('rake-leaderboard-chart');
-
+        let houseSimWorker;
 
         // --- CORE MATH & ML FUNCTIONS ---
-        function calculateInitialDispersion(handicap, distanceYds) {
-            const baselineAlpha = 0.05 + ((distanceYds - 75) / (250 - 75)) * 0.01;
-            const handicapModifier = 0.5 + (handicap / 30);
-            const finalAlpha = baselineAlpha * handicapModifier;
-            return distanceYds * 3 * finalAlpha;
-        }
-        
-        function kalmanUpdate(prior, measurement, measurementNoise) {
-            const processNoise = 0.1; 
-            const predictedEstimate = prior.estimate;
-            const predictedErrorCovariance = prior.errorCovariance + processNoise;
-            let kalmanGain = predictedErrorCovariance / (predictedErrorCovariance + measurementNoise);
-            const posteriorEstimate = predictedEstimate + kalmanGain * (measurement - predictedEstimate);
-            const posteriorErrorCovariance = (1 - kalmanGain) * predictedErrorCovariance;
-
-            return { 
-                estimate: posteriorEstimate, 
-                errorCovariance: posteriorErrorCovariance,
-            };
-        }
-
-        function resetSkillModel() {
-            const handicap = parseInt(handicapSlider.value);
-            holeData.forEach(hole => {
-                const initialDispersion = calculateInitialDispersion(handicap, hole.dist);
-                playerState.kalmanFilters[hole.id] = {
-                    initialEstimate: initialDispersion,
-                    estimate: initialDispersion,
-                    errorCovariance: 1000,
-                    p_max_history: [],
-                    shot_batch: [],
-                };
-            });
-            lastShotData = null;
-            updateAllDisplays();
-            saveState();
-        }
-
-        function numericalIntegrate(func, a, b, n) {
-            const step = (b - a) / n;
-            let sum = (func(a) + func(b)) / 2.0;
-            for (let i = 1; i < n; i++) {
-                sum += func(a + i * step);
+        const KFK = { // Kalman Filter Kernel
+            update: (prior, measurement, measurementNoise) => {
+                const predictedEstimate = prior.estimate;
+                const predictedErrorCovariance = prior.errorCovariance + CONFIG.KALMAN_PROCESS_NOISE;
+                const kalmanGain = predictedErrorCovariance / (predictedErrorCovariance + measurementNoise);
+                const posteriorEstimate = predictedEstimate + kalmanGain * (measurement - predictedEstimate);
+                const posteriorErrorCovariance = (1 - kalmanGain) * predictedErrorCovariance;
+                return { estimate: posteriorEstimate, errorCovariance: posteriorErrorCovariance };
             }
-            return sum * step;
-        }
+        };
+        
+        const Utils = {
+            calculateInitialDispersion: (handicap, distanceYds) => {
+                const baselineAlpha = 0.05 + ((distanceYds - 75) / (250 - 75)) * 0.01;
+                const handicapModifier = 0.5 + (handicap / 30);
+                return distanceYds * 3 * (baselineAlpha * handicapModifier);
+            },
+            numericalIntegrate: (func, a, b, n) => {
+                const step = (b - a) / n;
+                let sum = (func(a) + func(b)) / 2.0;
+                for (let i = 1; i < n; i++) sum += func(a + i * step);
+                return sum * step;
+            },
+            calculatePmax: (s, hole) => {
+                const { d_max, k, RTP } = hole;
+                const integrand = (d) => {
+                    if (d <= 0 || d > d_max) return 0;
+                    const payoutPart = Math.pow(1 - d / d_max, k);
+                    const pdf = (d / (s * s)) * Math.exp(-(d * d) / (2 * s * s));
+                    return payoutPart * pdf;
+                };
+                const integralResult = Utils.numericalIntegrate(integrand, 0, d_max, 1000);
+                return integralResult === 0 ? 100 : RTP / integralResult;
+            },
+            randomNormal: (mean, stdDev) => {
+                let u1 = 0, u2 = 0;
+                while (u1 === 0) u1 = Math.random();
+                while (u2 === 0) u2 = Math.random();
+                const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+                return z0 * stdDev + mean;
+            },
+            simulateShot: (s) => {
+                const dispersion = (Math.random() < CONFIG.FAT_TAIL_PROBABILITY) ? s * CONFIG.FAT_TAIL_MULTIPLIER : s;
+                const x = Utils.randomNormal(0, dispersion);
+                const y = Utils.randomNormal(0, dispersion);
+                return Math.sqrt(x * x + y * y);
+            },
+            calculateConfidence: (errorCovariance) => {
+                const minUncertainty = 50, maxUncertainty = 1000;
+                if (errorCovariance >= maxUncertainty) return 0;
+                if (errorCovariance <= minUncertainty) return 100;
+                const confidence = 100 * (1 - Math.log(errorCovariance / minUncertainty) / Math.log(maxUncertainty / minUncertainty));
+                return Math.max(0, Math.min(100, confidence));
+            },
+            formatCurrency: (value) => `$${value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+        };
 
-        function calculatePmax(s, hole) {
-            const { d_max, k, RTP } = hole;
-            const integrand = (d) => {
-                if (d <= 0 || d > d_max) return 0;
-                const payoutPart = Math.pow(1 - d / d_max, k);
-                const pdf = (d / (s * s)) * Math.exp(-(d * d) / (2 * s * s));
-                return payoutPart * pdf;
-            };
-            const integralResult = numericalIntegrate(integrand, 0, d_max, 1000);
-            return integralResult === 0 ? 100 : RTP / integralResult;
-        }
+        // --- PLAYER CLASS ---
+        class Player {
+            constructor(handicap) {
+                this.handicap = handicap;
+                this.kalmanFilters = {};
+                CLUB_CATEGORIES.forEach(category => {
+                    // Use an average distance for the category to find a representative initial dispersion
+                    const representativeHole = HOLE_DATA.find(h => h.category === category);
+                    const initialDispersion = Utils.calculateInitialDispersion(this.handicap, representativeHole.dist);
+                    this.kalmanFilters[category] = {
+                        initialEstimate: initialDispersion,
+                        estimate: initialDispersion,
+                        errorCovariance: 1000,
+                        p_max_history: [],
+                        shot_batch: [],
+                    };
+                });
+            }
 
-        function randomNormal(mean, stdDev) {
-            let u1 = 0, u2 = 0;
-            while (u1 === 0) u1 = Math.random();
-            while (u2 === 0) u2 = Math.random();
-            const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-            return z0 * stdDev + mean;
-        }
+            getSkillForHole(hole) {
+                return this.kalmanFilters[hole.category];
+            }
 
-        function simulateShot(s) {
-            const x = randomNormal(0, s);
-            const y = randomNormal(0, s);
-            return Math.sqrt(x * x + y * y);
+            updateSkill(hole, batch, p_max) {
+                const category = hole.category;
+                const kfState = this.kalmanFilters[category];
+                
+                const totalWagerInBatch = batch.reduce((sum, shot) => sum + shot.wager, 0);
+                if (totalWagerInBatch === 0) return;
+
+                const weightedSumOfMisses = batch.reduce((sum, shot) => sum + (shot.miss * shot.wager), 0);
+                const weightedAverageMiss = weightedSumOfMisses / totalWagerInBatch;
+                const unbiasedMeasurement = weightedAverageMiss / Math.sqrt(Math.PI / 2);
+                
+                const batchVariance = batch.length < 2 ? 0 : batch.map(s => Math.pow(s.miss - (batch.reduce((a,b) => a+b.miss,0)/batch.length), 2)).reduce((a,b) => a+b, 0) / batch.length;
+                const dynamicMeasurementNoise = CONFIG.KALMAN_BASE_MEASUREMENT_NOISE + batchVariance * 10;
+                
+                const updatedState = KFK.update(kfState, unbiasedMeasurement, dynamicMeasurementNoise);
+                kfState.estimate = updatedState.estimate;
+                kfState.errorCovariance = updatedState.errorCovariance;
+                kfState.p_max_history.push(p_max);
+                kfState.shot_batch = [];
+            }
         }
 
         // --- UI & VISUALIZATION ---
-        function updateAllDisplays() {
-            updateUIDisplay();
-            updateTrackerUI();
-            updatePayoutChart();
-            updatePmaxHistoryChart();
-        }
-
-        function calculateConfidence(errorCovariance) {
-            const minUncertainty = 50;
-            const maxUncertainty = 1000;
-            if (errorCovariance >= maxUncertainty) return 0;
-            if (errorCovariance <= minUncertainty) return 100;
-            const confidence = 100 * (1 - Math.log(errorCovariance / minUncertainty) / Math.log(maxUncertainty / minUncertainty));
-            return Math.max(0, Math.min(100, confidence));
-        }
-
-        function updateConfidenceUI(holeState) {
-            const confidence = calculateConfidence(holeState.errorCovariance);
-            confidenceBar.style.width = `${confidence}%`;
-            confidenceText.textContent = `${confidence.toFixed(0)}%`;
-        }
-
-        function updateUIDisplay() {
-            const handicap = parseInt(handicapSlider.value);
-            const holeState = playerState.kalmanFilters[selectedHoleId];
-            if (!holeState) return;
-            const currentDispersion = holeState.estimate;
-            const originalDispersion = holeState.initialEstimate;
-            
-            handicapValue.textContent = handicap;
-            dispersionValue.textContent = `${currentDispersion.toFixed(1)} ft`;
-            originalDispersionValue.textContent = `${originalDispersion.toFixed(1)} ft`;
-            shotBatchStatusEl.textContent = `(Shot ${holeState.shot_batch.length + 1} of ${BATCH_SIZE})`;
-            
-            const hole = holeData.find(h => h.id === selectedHoleId);
-            const p_max = calculatePmax(currentDispersion, hole);
-            const breakeven = hole.d_max * (1 - Math.pow(p_max, -1/hole.k));
-            
-            drawTarget(hole.d_max, currentDispersion, breakeven);
-            updateConfidenceUI(holeState);
-        }
-        
-        function updateTrackerUI() {
-            totalWageredEl.textContent = `$${totalWagered.toFixed(2)}`;
-            totalWonEl.textContent = `$${totalWon.toFixed(2)}`;
-            const net = totalWon - totalWagered;
-            netTotalEl.textContent = `${net < 0 ? '-' : ''}$${Math.abs(net).toFixed(2)}`;
-            netTotalEl.className = `font-semibold ${net > 0 ? 'text-[#9e8cb4]' : net < 0 ? 'text-[#ac7c6c]' : 'text-white'}`;
-
-            const selectedHole = holeData.find(h => h.id === selectedHoleId);
-            const setEdge = (1 - selectedHole.RTP) * 100;
-            setHouseEdgeEl.textContent = `${setEdge.toFixed(1)}%`;
-
-            let calculatedEdge = 0;
-            if (totalWagered > 0) {
-                calculatedEdge = ((totalWagered - totalWon) / totalWagered) * 100;
-            }
-            calculatedHouseEdgeEl.textContent = `${calculatedEdge.toFixed(1)}%`;
-        }
-        
-        function drawProbabilityDensity(s, d_max) {
-            const center = shotCanvas.width / 2;
-            const maxRadiusPx = center * 0.95;
-            const dispersionPx = (s / d_max) * maxRadiusPx;
-            const numCircles = 10;
-            for (let i = numCircles; i > 0; i--) {
-                shotCtx.beginPath();
-                const radius = (i / numCircles) * (dispersionPx * 3); 
-                shotCtx.arc(center, center, Math.min(radius, maxRadiusPx), 0, 2 * Math.PI);
-                shotCtx.fillStyle = `rgba(96, 76, 156, ${0.15 / i})`;
-                shotCtx.fill();
-            }
-        }
-
-        function drawTarget(d_max, currentDispersion, breakeven) {
-            const center = shotCanvas.width / 2;
-            const maxRadiusPx = center * 0.95;
-            shotCtx.clearRect(0, 0, shotCanvas.width, shotCanvas.height);
-            if (currentDispersion) {
-                drawProbabilityDensity(currentDispersion, d_max);
-            }
-            for(let i = 1; i <= 4; i++) {
-                shotCtx.beginPath();
-                shotCtx.arc(center, center, maxRadiusPx * (i/4), 0, 2 * Math.PI);
-                shotCtx.strokeStyle = `rgba(223, 201, 173, 0.2)`;
-                shotCtx.lineWidth = 1;
-                shotCtx.stroke();
-            }
-            
-            // Draw Breakeven Radius
-            if (breakeven && breakeven > 0) {
-                const breakevenRadiusPx = (breakeven / d_max) * maxRadiusPx;
-                shotCtx.beginPath();
-                shotCtx.arc(center, center, breakevenRadiusPx, 0, 2 * Math.PI);
-                shotCtx.strokeStyle = `rgba(126, 102, 73, 1)`; // Dark Gold
-                shotCtx.lineWidth = 2;
-                shotCtx.setLineDash([5, 5]);
-                shotCtx.stroke();
-                shotCtx.setLineDash([]); // Reset dash
-            }
-
-            shotCtx.beginPath();
-            shotCtx.arc(center, center, 4, 0, 2 * Math.PI);
-            shotCtx.fillStyle = brandTan;
-            shotCtx.fill();
-        }
-
-        function drawShot(missDistance, d_max) {
-            const center = shotCanvas.width / 2;
-            const maxRadius = center * 0.95;
-            const radius = Math.min((missDistance / d_max) * maxRadius, maxRadius);
-            const angle = Math.random() * 2 * Math.PI;
-            const x = center + radius * Math.cos(angle);
-            const y = center + radius * Math.sin(angle);
-            shotCtx.beginPath();
-            shotCtx.arc(x, y, 6, 0, 2 * Math.PI);
-            shotCtx.fillStyle = brandTan;
-            shotCtx.fill();
-            shotCtx.strokeStyle = 'rgba(0,0,0,0.5)';
-            shotCtx.lineWidth = 2;
-            shotCtx.stroke();
-        }
-
-        const chartOptions = {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { 
-                    title: { display: true, text: 'Miss Distance (ft)', color: textColor, font: { size: 10 } }, 
-                    ticks: { color: textColor, font: { size: 10 } },
-                    grid: { color: 'rgba(223, 201, 173, 0.1)' }
-                },
-                y: { 
-                    title: { display: true, text: 'Multiplier (x)', color: textColor, font: { size: 10 } }, 
-                    ticks: { color: textColor, font: { size: 10 } },
-                    grid: { color: 'rgba(223, 201, 173, 0.1)' },
-                    beginAtZero: true 
-                }
-            }
+        const DOM = { // Centralized DOM element references
+            playerSimPage: document.getElementById('player-simulator-page'),
+            houseSimPage: document.getElementById('house-simulator-page'),
+            rakeSimPage: document.getElementById('rake-simulator-page'),
+            playerSimBtn: document.getElementById('player-sim-btn'),
+            houseSimBtn: document.getElementById('house-sim-btn'),
+            rakeSimBtn: document.getElementById('rake-sim-btn'),
+            handicap: document.getElementById('handicap'),
+            handicapValue: document.getElementById('handicapValue'),
+            clubCategoryValue: document.getElementById('clubCategoryValue'),
+            dispersionValue: document.getElementById('dispersionValue'),
+            originalDispersionValue: document.getElementById('originalDispersionValue'),
+            confidenceBar: document.getElementById('confidence-bar'),
+            confidenceText: document.getElementById('confidence-text'),
+            wager: document.getElementById('wager'),
+            holeSelection: document.getElementById('hole-selection'),
+            hitBallBtn: document.getElementById('hit-ball-btn'),
+            shotVisualizer: document.getElementById('shot-visualizer'),
+            results: document.getElementById('results'),
+            shotBatchStatus: document.getElementById('shot-batch-status'),
+            totalWagered: document.getElementById('totalWagered'),
+            totalWon: document.getElementById('totalWon'),
+            netTotal: document.getElementById('netTotal'),
+            setHouseEdge: document.getElementById('setHouseEdge'),
+            calculatedHouseEdge: document.getElementById('calculatedHouseEdge'),
+            resetSkillBtn: document.getElementById('reset-skill-btn'),
+            resetSessionBtn: document.getElementById('reset-session-btn'),
+            devModeToggle: document.getElementById('devModeToggle'),
+            devModeControls: document.getElementById('dev-mode-controls'),
+            manualMissInput: document.getElementById('manualMissInput'),
+            runHouseSimBtn: document.getElementById('run-house-sim-btn'),
+            numBays: document.getElementById('numBays'),
+            simHours: document.getElementById('simHours'),
+            shotsPerHour: document.getElementById('shotsPerHour'),
+            playerArchetype: document.getElementById('playerArchetype'),
+            houseResultsContainer: document.getElementById('house-results-container'),
+            houseInitialMessage: document.getElementById('house-initial-message'),
+            houseTotalWagered: document.getElementById('houseTotalWagered'),
+            houseTotalPayouts: document.getElementById('houseTotalPayouts'),
+            houseNetProfit: document.getElementById('houseNetProfit'),
+            houseHoldPercent: document.getElementById('houseHoldPercent'),
+            houseSimProgress: document.getElementById('house-sim-progress'),
+            progressText: document.getElementById('progress-text'),
+            progressBar: document.getElementById('progress-bar'),
+            heatmapContainer: document.getElementById('heatmap-container'),
+            payoutDistContainer: document.getElementById('payout-dist-container'),
+            // Rake elements
+            rakeGameModeSelect: document.getElementById('rakeGameMode'),
+            rakeCtpHoleContainer: document.getElementById('rake-ctp-hole-container'),
+            rakeCtpHoleSelect: document.getElementById('rakeCtpHole'),
+            rakePayoutStructureSelect: document.getElementById('rakePayoutStructure'),
+            rakeEntryFeeInput: document.getElementById('rakeEntryFee'),
+            rakeNumPlayersInput: document.getElementById('rakeNumPlayers'),
+            rakePercentageInput: document.getElementById('rakePercentage'),
+            randomizeRakeBtn: document.getElementById('randomize-rake-btn'),
+            runRakeSimBtn: document.getElementById('run-rake-sim-btn'),
+            rakeResultsContainer: document.getElementById('rake-results-container'),
+            rakeInitialMessage: document.getElementById('rake-initial-message'),
+            rakeFinancialSummaryEl: document.getElementById('rake-financial-summary'),
+            rakeLeaderboardCanvas: document.getElementById('rake-leaderboard-chart'),
         };
 
-        function initPayoutChart() {
-            if (payoutChartInstance) payoutChartInstance.destroy();
-            const ctx = chartCanvas.getContext('2d');
-            const specificOptions = JSON.parse(JSON.stringify(chartOptions)); // Deep copy
-            specificOptions.plugins.tooltip = {
-                callbacks: {
-                    title: (tooltipItems) => `Miss: ${tooltipItems[0].label}`,
-                    label: (tooltipItem) => `Multiplier: ${tooltipItem.raw.toFixed(2)}x`
-                }
-            };
-            payoutChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [
-                    { label: 'Payout Multiplier', data: [], borderColor: brandBrightPurple, backgroundColor: 'rgba(96, 76, 156, 0.2)', fill: true, tension: 0.4, pointRadius: 0 }, 
-                    { label: 'Last Shot', data: [], backgroundColor: brandDarkGold, borderColor: 'white', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }
-                ]},
-                options: specificOptions
-            });
-        }
-        
-        function initPmaxHistoryChart() {
-            if (pmaxHistoryChartInstance) pmaxHistoryChartInstance.destroy();
-            const ctx = pmaxHistoryCanvas.getContext('2d');
-            const specificOptions = JSON.parse(JSON.stringify(chartOptions)); // Deep copy
-            specificOptions.scales.x.title.text = 'Update Number';
-            specificOptions.scales.y.title.text = 'P_max (x)';
-            specificOptions.scales.y.beginAtZero = false;
-            pmaxHistoryChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'P_max', data: [], borderColor: brandDarkGold, backgroundColor: 'rgba(126, 102, 73, 0.2)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: brandDarkGold }] },
-                options: specificOptions
-            });
-        }
-
-        function initHouseProfitChart() {
-            if (houseProfitChartInstance) houseProfitChartInstance.destroy();
-            const ctx = houseProfitChartCanvas.getContext('2d');
-            const specificOptions = JSON.parse(JSON.stringify(chartOptions));
-            specificOptions.scales.x.title.text = 'Time (Hours)';
-            specificOptions.scales.y.title.text = 'Cumulative Profit ($)';
-            specificOptions.scales.y.beginAtZero = true;
-            houseProfitChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'Profit', data: [], borderColor: brandBrightPurple, backgroundColor: 'rgba(96, 76, 156, 0.2)', fill: true, tension: 0.1 }] },
-                options: specificOptions
-            });
-        }
-
-        function initHeatmapChart() {
-            if (heatmapChartInstance) heatmapChartInstance.destroy();
-            const ctx = heatmapCanvas.getContext('2d');
-            heatmapChartInstance = new Chart(ctx, {
-                type: 'matrix',
-                data: {
-                    datasets: [{
-                        label: 'Hold %',
-                        data: [],
-                        backgroundColor(ctx) {
-                            const dataPoint = ctx.dataset.data[ctx.dataIndex];
-                            if (!dataPoint) {
-                                return 'rgba(255, 255, 255, 0.05)';
-                            }
-                            const value = dataPoint.v;
-                            if (value === null || typeof value === 'undefined') {
-                                return 'rgba(255, 255, 255, 0.05)';
-                            }
-
-                            if (value < 0) {
-                                // Negative hold (loss), use Rose Copper
-                                const alpha = Math.abs(value) / 10; // Normalize from 0% to -10% loss
-                                return `rgba(172, 124, 108, ${Math.max(0.1, Math.min(1, alpha))})`; // Rose Copper
-                            } else {
-                                // Positive hold (profit), use Deep Purple
-                                const alpha = (value - 5) / 15; // Normalize from 5% to 20% hold
-                                return `rgba(73, 59, 124, ${Math.max(0.1, Math.min(1, alpha))})`; // Deep Purple
-                            }
-                        },
-                        borderColor: 'rgba(223, 201, 173, 0.1)',
-                        borderWidth: 1,
-                        width: ({chart}) => (chart.chartArea || {}).width / 7 - 1,
-                        height: ({chart}) => (chart.chartArea || {}).height / 8 - 1,
-                    }]
-                },
-                options: {
+        const Charts = {
+            instances: {},
+            textColor: 'rgba(223, 201, 173, 0.8)',
+            gridColor: 'rgba(223, 201, 173, 0.1)',
+            brandBrightPurple: '#604c9c',
+            brandDarkGold: '#7e6649',
+            brandTan: '#dfc9ad',
+            
+            init() {
+                this.initPayoutChart();
+                this.initPmaxHistoryChart();
+                this.initHouseProfitChart();
+                this.initHeatmapChart();
+                this.initPayoutDistributionChart();
+                this.initRakeLeaderboardChart();
+            },
+            
+            getBaseOptions() {
+                return {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: false,
-                        tooltip: {
-                            callbacks: {
-                                title: () => '',
-                                label: (ctx) => {
-                                    const item = ctx.dataset.data[ctx.dataIndex];
-                                    return `HCP ${item.x}: ${item.y}yds - Hold: ${item.v.toFixed(2)}%`;
-                                }
-                            }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            type: 'category',
-                            labels: ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30+'],
-                            title: { display: true, text: 'Player Handicap', color: textColor },
-                            ticks: { color: textColor },
-                            grid: { display: false }
+                        x: { title: { display: true, color: this.textColor, font: { size: 10 } }, ticks: { color: this.textColor, font: { size: 10 } }, grid: { color: this.gridColor } },
+                        y: { title: { display: true, color: this.textColor, font: { size: 10 } }, ticks: { color: this.textColor, font: { size: 10 } }, grid: { color: this.gridColor }, beginAtZero: true }
+                    }
+                };
+            },
+
+            initPayoutChart() {
+                if (this.instances.payout) this.instances.payout.destroy();
+                const options = this.getBaseOptions();
+                options.scales.x.title.text = 'Miss Distance (ft)';
+                options.scales.y.title.text = 'Multiplier (x)';
+                this.instances.payout = new Chart('payout-chart', {
+                    type: 'line',
+                    data: { labels: [], datasets: [
+                        { label: 'Payout', data: [], borderColor: this.brandBrightPurple, backgroundColor: 'rgba(96, 76, 156, 0.2)', fill: true, tension: 0.4, pointRadius: 0 },
+                        { label: 'Last Shot', data: [], backgroundColor: this.brandDarkGold, borderColor: 'white', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8, showLine: false }
+                    ]},
+                    options: options
+                });
+            },
+
+            initPmaxHistoryChart() {
+                if (this.instances.pmaxHistory) this.instances.pmaxHistory.destroy();
+                const options = this.getBaseOptions();
+                options.scales.x.title.text = 'Update Number';
+                options.scales.y.title.text = 'P_max (x)';
+                options.scales.y.beginAtZero = false;
+                this.instances.pmaxHistory = new Chart('pmax-history-chart', {
+                    type: 'line',
+                    data: { labels: [], datasets: [{ data: [], borderColor: this.brandDarkGold, backgroundColor: 'rgba(126, 102, 73, 0.2)', fill: true, tension: 0.4, pointRadius: 3 }] },
+                    options: options
+                });
+            },
+
+            initHouseProfitChart() {
+                if (this.instances.houseProfit) this.instances.houseProfit.destroy();
+                const options = this.getBaseOptions();
+                options.scales.x.title.text = 'Time (Hours)';
+                options.scales.y.title.text = 'Cumulative Profit ($)';
+                this.instances.houseProfit = new Chart('house-profit-chart', {
+                    type: 'line',
+                    data: { labels: [], datasets: [{ data: [], borderColor: this.brandBrightPurple, backgroundColor: 'rgba(96, 76, 156, 0.2)', fill: true, tension: 0.1 }] },
+                    options: options
+                });
+            },
+
+            initPayoutDistributionChart() {
+                 if (this.instances.payoutDist) this.instances.payoutDist.destroy();
+                const options = this.getBaseOptions();
+                options.scales.x.title.text = 'Payout Multiplier Range';
+                options.scales.y.title.text = '# of Payouts';
+                this.instances.payoutDist = new Chart('payout-distribution-chart', {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ label: 'Frequency', data: [], backgroundColor: this.brandTan, borderColor: this.brandDarkGold, borderWidth: 1 }] },
+                    options
+                });
+            },
+
+            initHeatmapChart() {
+                if (this.instances.heatmap) this.instances.heatmap.destroy();
+                this.instances.heatmap = new Chart('heatmap-chart', {
+                    type: 'matrix',
+                    data: { datasets: [{
+                        data: [],
+                        backgroundColor: (ctx) => {
+                            const value = ctx.dataset.data[ctx.dataIndex]?.v;
+                            if (value === null || typeof value === 'undefined') return 'rgba(255, 255, 255, 0.05)';
+                            if (value < 0) return `rgba(172, 124, 108, ${Math.max(0.1, Math.min(1, Math.abs(value) / 10))})`;
+                            return `rgba(73, 59, 124, ${Math.max(0.1, Math.min(1, (value - 5) / 15))})`;
                         },
-                        y: {
-                            type: 'category',
-                            labels: holeData.map(h => `${h.dist}yd`),
-                            title: { display: true, text: 'Target Distance', color: textColor },
-                            ticks: { color: textColor },
-                            grid: { display: false },
-                            offset: true
+                        borderColor: 'rgba(223, 201, 173, 0.1)', borderWidth: 1,
+                        width: ({chart}) => (chart.chartArea || {}).width / 7 - 1,
+                        height: ({chart}) => (chart.chartArea || {}).height / HOLE_DATA.length - 1,
+                    }]},
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: false, tooltip: { callbacks: { title: () => '', label: (ctx) => { const i = ctx.dataset.data[ctx.dataIndex]; return `HCP ${i.x}: ${i.y}yds - Hold: ${i.v.toFixed(2)}%`; }}}},
+                        scales: {
+                            x: { type: 'category', labels: ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30+'], title: { display: true, text: 'Player Handicap', color: this.textColor }, ticks: { color: this.textColor }, grid: { display: false } },
+                            y: { type: 'category', labels: HOLE_DATA.map(h => `${h.dist}yd`), title: { display: true, text: 'Target Distance', color: this.textColor }, ticks: { color: this.textColor }, grid: { display: false }, offset: true }
                         }
                     }
-                }
-            });
-        }
-
-        function initRakeLeaderboardChart() {
-            if (rakeLeaderboardChartInstance) rakeLeaderboardChartInstance.destroy();
-            const ctx = rakeLeaderboardCanvas.getContext('2d');
-            const specificOptions = JSON.parse(JSON.stringify(chartOptions));
-            specificOptions.indexAxis = 'y';
-            specificOptions.scales.x.title.text = 'Score';
-            specificOptions.scales.y.title.text = 'Player';
-            rakeLeaderboardChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Score',
-                        data: [],
-                        backgroundColor: brandTan,
-                        borderColor: brandDarkGold,
-                        borderWidth: 1
-                    }]
-                },
-                options: specificOptions
-            });
-        }
-
-        function updatePayoutChart() {
-            if (!payoutChartInstance || !playerState.kalmanFilters[selectedHoleId]) return;
-            const hole = holeData.find(h => h.id === selectedHoleId);
-            const s = playerState.kalmanFilters[selectedHoleId].estimate;
-            const p_max = calculatePmax(s, hole);
-            const labels = [];
-            const curveData = [];
-            const steps = 50;
-            for (let i = 0; i <= steps; i++) {
-                const d = (i / steps) * hole.d_max;
-                labels.push(d.toFixed(1));
-                curveData.push(p_max * Math.pow(1 - d / hole.d_max, hole.k));
-            }
-            const shotMarkerData = new Array(steps + 1).fill(null);
-            if(lastShotData) {
-                const closestIndex = labels.reduce((bestIndex, label, currentIndex, arr) => {
-                    const diff = Math.abs(parseFloat(label) - lastShotData.missDistance);
-                    const bestDiff = Math.abs(parseFloat(arr[bestIndex]) - lastShotData.missDistance);
-                    return diff < bestDiff ? currentIndex : bestIndex;
-                }, 0);
-                shotMarkerData[closestIndex] = lastShotData.multiplier;
-            }
-            payoutChartInstance.data.labels = labels.map(l => `${l} ft`);
-            payoutChartInstance.data.datasets[0].data = curveData;
-            payoutChartInstance.data.datasets[1].data = shotMarkerData;
-            payoutChartInstance.options.scales.y.max = Math.ceil(p_max / 5) * 5;
-            payoutChartInstance.update();
-        }
-        
-        function updatePmaxHistoryChart() {
-            if (!pmaxHistoryChartInstance || !playerState.kalmanFilters[selectedHoleId]) return;
-            const history = playerState.kalmanFilters[selectedHoleId].p_max_history;
-            pmaxHistoryChartInstance.data.labels = history.map((_, i) => `Update ${i + 1}`);
-            pmaxHistoryChartInstance.data.datasets[0].data = history;
-            pmaxHistoryChartInstance.update();
-        }
-
-        // --- DATA PERSISTENCE ---
-        function saveState() {
-            try {
-                localStorage.setItem('golfWagerPlayerState', JSON.stringify(playerState));
-                localStorage.setItem('golfWagerTotalWagered', totalWagered);
-                localStorage.setItem('golfWagerTotalWon', totalWon);
-            } catch (e) { console.error("Could not save state:", e); }
-        }
-
-        function loadState() {
-            try {
-                const savedState = localStorage.getItem('golfWagerPlayerState');
-                if (savedState) {
-                    playerState = JSON.parse(savedState);
-                    totalWagered = parseFloat(localStorage.getItem('golfWagerTotalWagered')) || 0;
-                    totalWon = parseFloat(localStorage.getItem('golfWagerTotalWon')) || 0;
-                } else {
-                    resetSkillModel();
-                }
-            } catch (e) {
-                console.error("Could not load state:", e);
-                resetSkillModel();
-            }
-        }
-
-        // --- EVENT HANDLERS & INITIALIZATION ---
-        function calculateVariance(batch) {
-            if (batch.length < 2) return 0;
-            const mean = batch.reduce((sum, shot) => sum + shot.miss, 0) / batch.length;
-            const squaredDiffs = batch.map(shot => Math.pow(shot.miss - mean, 2));
-            return squaredDiffs.reduce((sum, val) => sum + val, 0) / batch.length;
-        }
-
-        function processBatch(holeState, batch, p_max) {
-            const totalWagerInBatch = batch.reduce((sum, shot) => sum + shot.wager, 0);
-            if (totalWagerInBatch === 0) return holeState;
-
-            const weightedSumOfMisses = batch.reduce((sum, shot) => sum + (shot.miss * shot.wager), 0);
-            const weightedAverageMiss = weightedSumOfMisses / totalWagerInBatch;
-            const unbiasedMeasurement = weightedAverageMiss / Math.sqrt(Math.PI / 2);
+                });
+            },
             
-            const batchVariance = calculateVariance(batch);
-            const baseMeasurementNoise = 500.0;
-            const dynamicMeasurementNoise = baseMeasurementNoise + batchVariance * 10; 
+            initRakeLeaderboardChart() {
+                if (this.instances.rake) this.instances.rake.destroy();
+                const options = this.getBaseOptions();
+                options.indexAxis = 'y';
+                options.scales.x.title.text = 'Score';
+                options.scales.y.title.text = 'Player';
+                this.instances.rake = new Chart(DOM.rakeLeaderboardCanvas, {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ label: 'Score', data: [], backgroundColor: this.brandTan, borderColor: this.brandDarkGold, borderWidth: 1 }] },
+                    options
+                });
+            },
 
-            const updatedKalmanState = kalmanUpdate(holeState, unbiasedMeasurement, dynamicMeasurementNoise);
-            holeState.estimate = updatedKalmanState.estimate;
-            holeState.errorCovariance = updatedKalmanState.errorCovariance;
-            if (holeState.p_max_history) {
-                holeState.p_max_history.push(p_max);
-            }
+            updateAllPlayerCharts() {
+                this.updatePayoutChart();
+                this.updatePmaxHistoryChart();
+            },
             
-            return holeState;
+            updatePayoutChart() {
+                const hole = HOLE_DATA.find(h => h.id === selectedHoleId);
+                const kfState = player.getSkillForHole(hole);
+                if (!this.instances.payout || !kfState) return;
+
+                const s = kfState.estimate;
+                const p_max = Utils.calculatePmax(s, hole);
+                const labels = [], curveData = [];
+                for (let i = 0; i <= 50; i++) {
+                    const d = (i / 50) * hole.d_max;
+                    labels.push(d.toFixed(1));
+                    curveData.push(p_max * Math.pow(1 - d / hole.d_max, hole.k));
+                }
+                const shotMarkerData = new Array(51).fill(null);
+                if (lastShotData) {
+                    const closestIndex = labels.reduce((best, l, cur, arr) => Math.abs(parseFloat(l) - lastShotData.missDistance) < Math.abs(parseFloat(arr[best]) - lastShotData.missDistance) ? cur : best, 0);
+                    shotMarkerData[closestIndex] = lastShotData.multiplier;
+                }
+                this.instances.payout.data.labels = labels.map(l => `${l} ft`);
+                this.instances.payout.data.datasets[0].data = curveData;
+                this.instances.payout.data.datasets[1].data = shotMarkerData;
+                this.instances.payout.options.scales.y.max = Math.ceil(p_max / 5) * 5;
+                this.instances.payout.update();
+            },
+            
+            updatePmaxHistoryChart() {
+                const hole = HOLE_DATA.find(h => h.id === selectedHoleId);
+                const kfState = player.getSkillForHole(hole);
+                if (!this.instances.pmaxHistory || !kfState) return;
+                const history = kfState.p_max_history;
+                this.instances.pmaxHistory.data.labels = history.map((_, i) => `U${i + 1}`);
+                this.instances.pmaxHistory.data.datasets[0].data = history;
+                this.instances.pmaxHistory.update();
+            },
+        };
+
+        const UI = {
+            init() {
+                this.setupPageToggles();
+                this.setupPlayerSimControls();
+                this.setupHouseSimControls();
+                this.setupRakeSimControls();
+
+                // Populate hole selectors
+                HOLE_DATA.forEach(hole => {
+                    const btn = document.createElement('button');
+                    btn.className = 'hole-btn border border-gray-600 rounded-md p-2 text-xs text-gray-300 hover:bg-[#493b7c] transition';
+                    btn.textContent = `${hole.dist}y`;
+                    btn.dataset.holeId = hole.id;
+                    if (hole.id === selectedHoleId) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        selectedHoleId = hole.id;
+                        lastShotData = null;
+                        document.querySelectorAll('.hole-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.updateAllDisplays();
+                    });
+                    DOM.holeSelection.appendChild(btn);
+
+                    const option = document.createElement('option');
+                    option.value = hole.id;
+                    option.textContent = `${hole.dist} yds`;
+                    DOM.rakeCtpHoleSelect.appendChild(option);
+                });
+            },
+            
+            setupPageToggles() {
+                const pages = { 'player-sim': DOM.playerSimPage, 'house-sim': DOM.houseSimPage, 'rake-sim': DOM.rakeSimPage };
+                const buttons = { 'player-sim': DOM.playerSimBtn, 'house-sim': DOM.houseSimBtn, 'rake-sim': DOM.rakeSimBtn };
+                Object.keys(buttons).forEach(key => {
+                    buttons[key].addEventListener('click', () => {
+                        Object.values(pages).forEach(p => p.classList.add('hidden'));
+                        Object.values(buttons).forEach(b => b.classList.remove('active'));
+                        pages[key].classList.remove('hidden');
+                        buttons[key].classList.add('active');
+                    });
+                });
+            },
+            
+            setupPlayerSimControls() {
+                DOM.handicap.addEventListener('input', e => DOM.handicapValue.textContent = e.target.value);
+                DOM.handicap.addEventListener('change', resetSkillModel);
+                DOM.resetSkillBtn.addEventListener('click', resetSkillModel);
+                DOM.resetSessionBtn.addEventListener('click', () => {
+                    totalWagered = totalWon = 0;
+                    this.updateTracker();
+                    saveState();
+                });
+                DOM.devModeToggle.addEventListener('change', () => DOM.devModeControls.classList.toggle('hidden'));
+                DOM.hitBallBtn.addEventListener('click', handleSimulation);
+            },
+
+            setupHouseSimControls() {
+                DOM.runHouseSimBtn.addEventListener('click', runHouseSimulation);
+            },
+
+            setupRakeSimControls() {
+                DOM.rakeGameModeSelect.addEventListener('change', e => {
+                    DOM.rakeCtpHoleContainer.classList.toggle('hidden', e.target.value !== 'closest_to_pin');
+                });
+                DOM.runRakeSimBtn.addEventListener('click', runRakeSimulation);
+                DOM.randomizeRakeBtn.addEventListener('click', randomizeRakeCompetition);
+            },
+            
+            updateAllDisplays() {
+                this.updateSkillDisplay();
+                this.updateTracker();
+                Charts.updateAllPlayerCharts();
+            },
+            
+            updateSkillDisplay() {
+                const hole = HOLE_DATA.find(h => h.id === selectedHoleId);
+                const kfState = player.getSkillForHole(hole);
+                if (!kfState) return;
+
+                DOM.handicapValue.textContent = DOM.handicap.value;
+                DOM.clubCategoryValue.textContent = hole.category;
+                DOM.dispersionValue.textContent = `${kfState.estimate.toFixed(1)} ft`;
+                DOM.originalDispersionValue.textContent = `${kfState.initialEstimate.toFixed(1)} ft`;
+                DOM.shotBatchStatus.textContent = `(Shot ${kfState.shot_batch.length + 1} of ${CONFIG.PLAYER_SHOT_BATCH_SIZE})`;
+                
+                const confidence = Utils.calculateConfidence(kfState.errorCovariance);
+                DOM.confidenceBar.style.width = `${confidence}%`;
+                DOM.confidenceText.textContent = `${confidence.toFixed(0)}%`;
+                
+                const p_max = Utils.calculatePmax(kfState.estimate, hole);
+                const breakeven = hole.d_max * (1 - Math.pow(p_max, -1 / hole.k));
+                this.drawTarget(hole.d_max, kfState.estimate, breakeven);
+            },
+            
+            updateTracker() {
+                DOM.totalWagered.textContent = Utils.formatCurrency(totalWagered);
+                DOM.totalWon.textContent = Utils.formatCurrency(totalWon);
+                const net = totalWon - totalWagered;
+                DOM.netTotal.textContent = Utils.formatCurrency(net);
+                DOM.netTotal.className = `font-semibold ${net > 0 ? 'text-[#9e8cb4]' : net < 0 ? 'text-[#ac7c6c]' : 'text-white'}`;
+                
+                const selectedHole = HOLE_DATA.find(h => h.id === selectedHoleId);
+                DOM.setHouseEdge.textContent = `${((1 - selectedHole.RTP) * 100).toFixed(1)}%`;
+                const calculatedEdge = totalWagered > 0 ? ((totalWagered - totalWon) / totalWagered) * 100 : 0;
+                DOM.calculatedHouseEdge.textContent = `${calculatedEdge.toFixed(1)}%`;
+            },
+            
+            drawTarget(d_max, s, breakeven) {
+                const ctx = DOM.shotVisualizer.getContext('2d');
+                const center = DOM.shotVisualizer.width / 2;
+                const maxRadiusPx = center * 0.95;
+                ctx.clearRect(0, 0, DOM.shotVisualizer.width, DOM.shotVisualizer.height);
+
+                // Probability density
+                const dispersionPx = (s / d_max) * maxRadiusPx;
+                for (let i = 10; i > 0; i--) {
+                    ctx.beginPath();
+                    ctx.arc(center, center, Math.min((i / 10) * (dispersionPx * 3), maxRadiusPx), 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(96, 76, 156, ${0.15 / i})`;
+                    ctx.fill();
+                }
+
+                // Target rings
+                for(let i = 1; i <= 4; i++) {
+                    ctx.beginPath();
+                    ctx.arc(center, center, maxRadiusPx * (i/4), 0, 2 * Math.PI);
+                    ctx.strokeStyle = `rgba(223, 201, 173, 0.2)`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+
+                // Breakeven radius
+                if (breakeven > 0) {
+                    const r = (breakeven / d_max) * maxRadiusPx;
+                    ctx.beginPath();
+                    ctx.arc(center, center, r, 0, 2 * Math.PI);
+                    ctx.strokeStyle = `rgba(126, 102, 73, 1)`;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // Center pin
+                ctx.beginPath();
+                ctx.arc(center, center, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = Charts.brandTan;
+                ctx.fill();
+            },
+            
+            drawShot(miss, d_max) {
+                const ctx = DOM.shotVisualizer.getContext('2d');
+                const center = DOM.shotVisualizer.width / 2;
+                const r = Math.min((miss / d_max) * (center * 0.95), center * 0.95);
+                const angle = Math.random() * 2 * Math.PI;
+                const x = center + r * Math.cos(angle);
+                const y = center + r * Math.sin(angle);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = Charts.brandTan;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+        };
+
+        // --- SIMULATION LOGIC ---
+        function resetSkillModel() {
+            player = new Player(parseInt(DOM.handicap.value));
+            lastShotData = null;
+            UI.updateAllDisplays();
+            saveState();
         }
 
         function handleSimulation() {
-            hitBallBtn.disabled = true;
-            hitBallBtn.textContent = 'Simulating...';
+            DOM.hitBallBtn.disabled = true;
+            DOM.hitBallBtn.textContent = 'Simulating...';
 
-            const wager = parseFloat(wagerInput.value);
-            const hole = holeData.find(h => h.id === selectedHoleId);
+            const wager = parseFloat(DOM.wager.value);
+            const hole = HOLE_DATA.find(h => h.id === selectedHoleId);
             if (isNaN(wager) || wager <= 0) {
-                resultsDiv.innerHTML = `<p class="text-red-500 font-semibold">Please enter a valid wager.</p>`;
-                hitBallBtn.disabled = false;
-                hitBallBtn.textContent = 'Hit Ball & Simulate';
+                DOM.results.innerHTML = `<p class="text-red-500 font-semibold">Please enter a valid wager.</p>`;
+                DOM.hitBallBtn.disabled = false;
+                DOM.hitBallBtn.textContent = 'Hit Ball & Simulate';
                 return;
             }
 
-            let holeState = playerState.kalmanFilters[selectedHoleId];
-            const s = holeState.estimate;
-            const p_max = calculatePmax(s, hole);
-            
-            let missDistance;
-            if (devModeToggle.checked) {
-                missDistance = parseFloat(manualMissInput.value);
-                if (isNaN(missDistance) || missDistance < 0) {
-                    resultsDiv.innerHTML = `<p class="text-red-500 font-semibold">Please enter a valid manual miss distance.</p>`;
-                    hitBallBtn.disabled = false;
-                    hitBallBtn.textContent = 'Hit Ball & Simulate';
-                    return;
-                }
-            } else {
-                missDistance = simulateShot(s);
-            }
+            const kfState = player.getSkillForHole(hole);
+            const s = kfState.estimate;
+            const p_max = Utils.calculatePmax(s, hole);
+            const missDistance = DOM.devModeToggle.checked ? parseFloat(DOM.manualMissInput.value) : Utils.simulateShot(s);
 
-            let payout = 0;
-            let multiplier = 0;
+            let multiplier = 0, payout = 0;
             if (missDistance <= hole.d_max) {
                 multiplier = p_max * Math.pow(1 - missDistance / hole.d_max, hole.k);
                 payout = wager * multiplier;
@@ -959,378 +901,337 @@
             lastShotData = { missDistance, multiplier };
             totalWagered += wager;
             totalWon += payout;
-            
+
             let updateMessage = "";
-
             const missForSkillUpdate = Math.min(missDistance, hole.d_max);
-
-            const avgWagerInBatch = holeState.shot_batch.reduce((sum, shot) => sum + shot.wager, 0) / (holeState.shot_batch.length || 1);
-            const isHighStakesShot = wager >= avgWagerInBatch * WAGER_THRESHOLD_MULTIPLIER && holeState.shot_batch.length > 0;
+            
+            const avgWagerInBatch = kfState.shot_batch.length > 0 ? kfState.shot_batch.reduce((sum, shot) => sum + shot.wager, 0) / kfState.shot_batch.length : 1;
+            const isHighStakesShot = wager >= avgWagerInBatch * CONFIG.HIGH_STAKES_WAGER_MULTIPLIER && kfState.shot_batch.length > 0;
 
             if (isHighStakesShot) {
-                if (holeState.shot_batch.length > 0) {
-                    holeState = processBatch(holeState, holeState.shot_batch, p_max);
+                if (kfState.shot_batch.length > 0) {
+                    player.updateSkill(hole, kfState.shot_batch, p_max);
                     updateMessage += `<p class="text-xs text-blue-400 mt-1">Low-stakes batch processed.</p>`;
                 }
-                holeState = processBatch(holeState, [{ miss: missForSkillUpdate, wager: wager }], p_max);
+                player.updateSkill(hole, [{ miss: missForSkillUpdate, wager: wager }], p_max);
                 updateMessage += `<p class="text-sm font-bold text-[#9e8cb4] mt-1">High-stakes shot triggered an immediate skill update!</p>`;
-                holeState.shot_batch = [];
             } else {
-                holeState.shot_batch.push({ miss: missForSkillUpdate, wager: wager });
-                if (holeState.shot_batch.length >= BATCH_SIZE) {
-                    holeState = processBatch(holeState, holeState.shot_batch, p_max);
-                    updateMessage = `<p class="text-sm font-bold text-[#9e8cb4] mt-2">Skill model updated based on last ${BATCH_SIZE} shots.</p>`;
-                    holeState.shot_batch = [];
+                kfState.shot_batch.push({ miss: missForSkillUpdate, wager: wager });
+                if (kfState.shot_batch.length >= CONFIG.PLAYER_SHOT_BATCH_SIZE) {
+                    player.updateSkill(hole, kfState.shot_batch, p_max);
+                    updateMessage = `<p class="text-sm font-bold text-[#9e8cb4] mt-2">Skill model updated based on last ${CONFIG.PLAYER_SHOT_BATCH_SIZE} shots.</p>`;
                 }
             }
             
             const breakeven = hole.d_max * (1 - Math.pow(p_max, -1/hole.k));
-
-            resultsDiv.innerHTML = `
+            DOM.results.innerHTML = `
                 <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-left">
                     <p class="text-gray-400">Miss Distance:</p><p class="font-semibold text-white text-right">${missDistance.toFixed(2)} ft</p>
                     <p class="text-gray-400">Breakeven Radius:</p><p class="font-semibold text-white text-right">${breakeven.toFixed(2)} ft</p>
                     <p class="text-gray-400">Multiplier:</p><p class="font-semibold text-white text-right">${multiplier.toFixed(2)}x</p>
                 </div>
                 <div class="mt-2 pt-2 border-t border-gray-700">
-                    <p class="text-lg text-center">Payout: <span class="font-bold text-2xl ${payout >= wager ? 'text-[#9e8cb4]' : 'text-[#ac7c6c]'}">$${payout.toFixed(2)}</span></p>
+                    <p class="text-lg text-center">Payout: <span class="font-bold text-2xl ${payout >= wager ? 'text-[#9e8cb4]' : 'text-[#ac7c6c]'}">${Utils.formatCurrency(payout)}</span></p>
                 </div>
                 ${updateMessage}
             `;
             
-            updateAllDisplays();
-            drawShot(missDistance, hole.d_max);
+            UI.updateAllDisplays();
+            UI.drawShot(missDistance, hole.d_max);
             saveState();
 
-            hitBallBtn.disabled = false;
-            hitBallBtn.textContent = 'Hit Ball & Simulate';
+            DOM.hitBallBtn.disabled = false;
+            DOM.hitBallBtn.textContent = 'Hit Ball & Simulate';
         }
+        
+        // --- HOUSE SIMULATION (WEB WORKER) ---
+        function runHouseSimulation() {
+            if (typeof(Worker) === "undefined") {
+                alert("Sorry, your browser does not support Web Workers. The simulation might be slow or unresponsive.");
+                // Optionally, you could run a fallback non-worker version here.
+                return;
+            }
 
-        // --- HOUSE SIMULATION LOGIC ---
-        async function runHouseSimulation() {
-            runHouseSimBtn.disabled = true;
-            runHouseSimBtn.textContent = 'Simulating...';
-            houseSimProgress.classList.remove('hidden');
-            houseInitialMessage.classList.add('hidden');
-            houseResultsContainer.classList.add('hidden');
-            heatmapContainer.classList.add('hidden');
+            DOM.runHouseSimBtn.disabled = true;
+            DOM.runHouseSimBtn.textContent = 'Simulating...';
+            DOM.houseSimProgress.classList.remove('hidden');
+            DOM.houseInitialMessage.classList.add('hidden');
+            DOM.houseResultsContainer.classList.add('hidden');
+            DOM.heatmapContainer.classList.add('hidden');
+            DOM.payoutDistContainer.classList.add('hidden');
 
-            const numBays = parseInt(numBaysInput.value);
-            const simHours = parseInt(simHoursInput.value);
-            const shotsPerHour = parseInt(shotsPerHourInput.value);
-            const totalShots = numBays * simHours * shotsPerHour;
-            const updateInterval = Math.max(1, Math.floor(totalShots / 100));
-            
-            let houseTotalWagered = 0;
-            let houseTotalPayouts = 0;
-            let profitData = [];
-            let labelData = [];
-            
-            const handicapBins = 7;
-            const handicapBinSize = 30 / (handicapBins -1);
-            let heatmapData = Array(holeData.length).fill(0).map(() => Array(handicapBins).fill(0).map(() => ({wagered: 0, paid: 0})));
+            // Terminate existing worker if any
+            if (houseSimWorker) houseSimWorker.terminate();
 
-            let virtualPlayers = [];
-            for (let i = 0; i < numBays; i++) {
-                const handicap = Math.floor(Math.random() * 31);
-                let player = { handicap, kalmanFilters: {} };
-                holeData.forEach(hole => {
-                    const initialDispersion = calculateInitialDispersion(handicap, hole.dist);
-                    player.kalmanFilters[hole.id] = {
-                        initialEstimate: initialDispersion,
-                        estimate: initialDispersion,
-                        errorCovariance: 1000,
-                        p_max_history: [],
-                        shot_batch: []
+            houseSimWorker = new Worker(URL.createObjectURL(new Blob([`
+                // This entire block is the content of the worker script
+                const workerLogic = () => {
+                    // Make CONFIG and data available inside worker scope
+                    let CONFIG, HOLE_DATA, CLUB_CATEGORIES, KFK, Utils, Player;
+
+                    self.onmessage = function(e) {
+                        if (e.data.type === 'start') {
+                            // Import all necessary logic and data
+                            CONFIG = e.data.payload.CONFIG;
+                            HOLE_DATA = e.data.payload.HOLE_DATA;
+                            CLUB_CATEGORIES = e.data.payload.CLUB_CATEGORIES;
+                            
+                            // Re-define necessary classes and functions inside worker
+                            KFK = { update: ${KFK.update.toString()} };
+                            Utils = {
+                                calculateInitialDispersion: ${Utils.calculateInitialDispersion.toString()},
+                                numericalIntegrate: ${Utils.numericalIntegrate.toString()},
+                                calculatePmax: ${Utils.calculatePmax.toString()},
+                                randomNormal: ${Utils.randomNormal.toString()},
+                                simulateShot: ${Utils.simulateShot.toString()}
+                            };
+                            Player = ${Player.toString()};
+                            
+                            runSimulation(e.data.payload.params);
+                        }
                     };
-                });
-                virtualPlayers.push(player);
-            }
 
-            for (let i = 0; i < totalShots; i++) {
-                const player = virtualPlayers[i % numBays];
-                const holeIndex = Math.floor(Math.random() * holeData.length);
-                const hole = holeData[holeIndex];
-                const wager = Math.floor(Math.random() * 20) + 1;
+                    function runSimulation(params) {
+                        const { numBays, simHours, shotsPerHour, playerArchetype } = params;
+                        const totalShots = numBays * simHours * shotsPerHour;
+                        const updateInterval = Math.max(1, Math.floor(totalShots / 200));
 
-                let holeState = player.kalmanFilters[hole.id];
-                const s = holeState.estimate;
-                const p_max = calculatePmax(s, hole);
-                const missDistance = simulateShot(s);
-                
-                let payout = 0;
-                if (missDistance <= hole.d_max) {
-                    payout = wager * (p_max * Math.pow(1 - missDistance / hole.d_max, hole.k));
+                        let houseTotalWagered = 0, houseTotalPayouts = 0;
+                        let profitData = [], labelData = [];
+                        let payoutDistribution = new Array(11).fill(0); // Bins for 0x, 1x, 2x... 10x+
+
+                        const handicapBins = 7;
+                        const handicapBinSize = 30 / (handicapBins - 1);
+                        let heatmapData = Array(HOLE_DATA.length).fill(0).map(() => Array(handicapBins).fill(0).map(() => ({ wagered: 0, paid: 0 })));
+
+                        // Player generation based on archetype
+                        const generateHandicap = () => {
+                            switch(playerArchetype) {
+                                case 'bell_curve_15':
+                                    return Math.round(Math.max(0, Math.min(30, Utils.randomNormal(15, 7))));
+                                case 'mostly_beginners':
+                                    return 30 - Math.floor(Math.pow(Math.random(), 0.5) * 30);
+                                case 'mostly_experts':
+                                    return Math.floor(Math.pow(Math.random(), 2) * 30);
+                                case 'uniform':
+                                default:
+                                    return Math.floor(Math.random() * 31);
+                            }
+                        };
+                        
+                        let virtualPlayers = Array.from({ length: numBays }, () => new Player(generateHandicap()));
+
+                        for (let i = 0; i < totalShots; i++) {
+                            const player = virtualPlayers[i % numBays];
+                            const holeIndex = Math.floor(Math.random() * HOLE_DATA.length);
+                            const hole = HOLE_DATA[holeIndex];
+                            const wager = Math.floor(Math.random() * 20) + 1;
+
+                            const kfState = player.getSkillForHole(hole);
+                            const s = kfState.estimate;
+                            const p_max = Utils.calculatePmax(s, hole);
+                            const missDistance = Utils.simulateShot(s);
+                            
+                            let payout = 0, multiplier = 0;
+                            if (missDistance <= hole.d_max) {
+                                multiplier = p_max * Math.pow(1 - missDistance / hole.d_max, hole.k);
+                                payout = wager * multiplier;
+                            }
+                            
+                            houseTotalWagered += wager;
+                            houseTotalPayouts += payout;
+                            
+                            const payoutBin = Math.min(10, Math.floor(multiplier));
+                            payoutDistribution[payoutBin]++;
+                            
+                            const handicapBin = Math.min(handicapBins - 1, Math.floor(player.handicap / handicapBinSize));
+                            heatmapData[holeIndex][handicapBin].wagered += wager;
+                            heatmapData[holeIndex][handicapBin].paid += payout;
+
+                            const missForSkillUpdate = Math.min(missDistance, hole.d_max);
+                            kfState.shot_batch.push({ miss: missForSkillUpdate, wager: wager });
+                            if (kfState.shot_batch.length >= CONFIG.PLAYER_SHOT_BATCH_SIZE) {
+                                player.updateSkill(hole, kfState.shot_batch, p_max);
+                            }
+
+                            if (i % updateInterval === 0 || i === totalShots - 1) {
+                                const percentComplete = ((i + 1) / totalShots) * 100;
+                                profitData.push(houseTotalWagered - houseTotalPayouts);
+                                labelData.push(((i / totalShots) * simHours).toFixed(1));
+                                self.postMessage({
+                                    type: 'progress',
+                                    payload: { percent: percentComplete, profitData, labelData }
+                                });
+                            }
+                        }
+
+                        // Final results
+                        self.postMessage({
+                            type: 'complete',
+                            payload: {
+                                totalWagered: houseTotalWagered,
+                                totalPayouts: houseTotalPayouts,
+                                heatmapData: heatmapData,
+                                payoutDistribution: payoutDistribution
+                            }
+                        });
+                    }
+                };
+                workerLogic();
+            `], { type: 'application/javascript' })));
+
+            // Handle messages from worker
+            houseSimWorker.onmessage = (e) => {
+                const { type, payload } = e.data;
+                if (type === 'progress') {
+                    DOM.progressText.textContent = `${Math.round(payload.percent)}%`;
+                    DOM.progressBar.style.width = `${payload.percent}%`;
+                    Charts.instances.houseProfit.data.labels = payload.labelData;
+                    Charts.instances.houseProfit.data.datasets[0].data = payload.profitData;
+                    Charts.instances.houseProfit.update('none'); // Update without animation
+                } else if (type === 'complete') {
+                    DOM.houseTotalWagered.textContent = Utils.formatCurrency(payload.totalWagered);
+                    DOM.houseTotalPayouts.textContent = Utils.formatCurrency(payload.totalPayouts);
+                    const netProfit = payload.totalWagered - payload.totalPayouts;
+                    DOM.houseNetProfit.textContent = Utils.formatCurrency(netProfit);
+                    const holdPercent = (netProfit / payload.totalWagered * 100);
+                    DOM.houseHoldPercent.textContent = `${holdPercent.toFixed(2)}%`;
+
+                    const finalHeatmapData = [];
+                    for (let y = 0; y < HOLE_DATA.length; y++) {
+                        for (let x = 0; x < 7; x++) {
+                            const bin = payload.heatmapData[y][x];
+                            const hold = bin.wagered > 0 ? ((bin.wagered - bin.paid) / bin.wagered) * 100 : 0;
+                            finalHeatmapData.push({x: Charts.instances.heatmap.options.scales.x.labels[x], y: Charts.instances.heatmap.options.scales.y.labels[y], v: hold});
+                        }
+                    }
+                    Charts.instances.heatmap.data.datasets[0].data = finalHeatmapData;
+                    Charts.instances.heatmap.update();
+
+                    Charts.instances.payoutDist.data.labels = ['0-1x', '1-2x', '2-3x', '3-4x', '4-5x', '5-6x', '6-7x', '7-8x', '8-9x', '9-10x', '10x+'];
+                    Charts.instances.payoutDist.data.datasets[0].data = payload.payoutDistribution;
+                    Charts.instances.payoutDist.update();
+
+                    DOM.houseResultsContainer.classList.remove('hidden');
+                    DOM.heatmapContainer.classList.remove('hidden');
+                    DOM.payoutDistContainer.classList.remove('hidden');
+                    DOM.houseSimProgress.classList.add('hidden');
+                    DOM.runHouseSimBtn.disabled = false;
+                    DOM.runHouseSimBtn.textContent = 'Run Simulation';
+                    houseSimWorker.terminate();
                 }
-
-                houseTotalWagered += wager;
-                houseTotalPayouts += payout;
-
-                const handicapBin = Math.min(handicapBins - 1, Math.floor(player.handicap / handicapBinSize));
-                heatmapData[holeIndex][handicapBin].wagered += wager;
-                heatmapData[holeIndex][handicapBin].paid += payout;
-
-                const missForSkillUpdate = Math.min(missDistance, hole.d_max);
-                holeState.shot_batch.push({ miss: missForSkillUpdate, wager: wager });
-                if (holeState.shot_batch.length >= BATCH_SIZE) {
-                    player.kalmanFilters[hole.id] = processBatch(holeState, holeState.shot_batch, p_max);
-                    holeState.shot_batch = [];
-                }
-
-                if (i % updateInterval === 0 || i === totalShots - 1) {
-                    const percentComplete = ((i + 1) / totalShots) * 100;
-                    progressText.textContent = `${Math.round(percentComplete)}%`;
-                    progressBar.style.width = `${percentComplete}%`;
-                    
-                    profitData.push(houseTotalWagered - houseTotalPayouts);
-                    labelData.push(((i / totalShots) * simHours).toFixed(1));
-
-                    await new Promise(resolve => setTimeout(resolve, 0));
-                }
-            }
-
-            houseTotalWageredEl.textContent = `$${houseTotalWagered.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            houseTotalPayoutsEl.textContent = `$${houseTotalPayouts.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            houseNetProfitEl.textContent = `$${(houseTotalWagered - houseTotalPayouts).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            houseHoldPercentEl.textContent = `${((houseTotalWagered - houseTotalPayouts) / houseTotalWagered * 100).toFixed(2)}%`;
+            };
             
-            houseProfitChartInstance.data.labels = labelData;
-            houseProfitChartInstance.data.datasets[0].data = profitData;
-            houseProfitChartInstance.update();
-
-            const finalHeatmapData = [];
-            for (let y = 0; y < holeData.length; y++) {
-                for (let x = 0; x < handicapBins; x++) {
-                    const bin = heatmapData[y][x];
-                    const hold = bin.wagered > 0 ? ((bin.wagered - bin.paid) / bin.wagered) * 100 : 0;
-                    finalHeatmapData.push({x: heatmapChartInstance.options.scales.x.labels[x], y: heatmapChartInstance.options.scales.y.labels[y], v: hold});
+            // Start the worker
+            houseSimWorker.postMessage({
+                type: 'start',
+                payload: {
+                    params: {
+                        numBays: parseInt(DOM.numBays.value),
+                        simHours: parseInt(DOM.simHours.value),
+                        shotsPerHour: parseInt(DOM.shotsPerHour.value),
+                        playerArchetype: DOM.playerArchetype.value
+                    },
+                    CONFIG, HOLE_DATA, CLUB_CATEGORIES
                 }
-            }
-            heatmapChartInstance.data.datasets[0].data = finalHeatmapData;
-            heatmapChartInstance.update();
-
-            houseResultsContainer.classList.remove('hidden');
-            heatmapContainer.classList.remove('hidden');
-            houseSimProgress.classList.add('hidden');
-            runHouseSimBtn.disabled = false;
-            runHouseSimBtn.textContent = 'Run Simulation';
+            });
         }
+        
+        // --- RAKE SIMULATION LOGIC (from original) ---
+        function runRakeSimulation() {
+            DOM.runRakeSimBtn.disabled = true;
+            DOM.rakeInitialMessage.classList.add('hidden');
+            DOM.rakeResultsContainer.classList.remove('hidden');
 
-        // --- RAKE SIMULATION LOGIC ---
-        async function runRakeSimulation() {
-            runRakeSimBtn.disabled = true;
-            rakeInitialMessage.classList.add('hidden');
-            rakeResultsContainer.classList.remove('hidden');
-
-            const gameMode = rakeGameModeSelect.value;
-            const payoutStructure = rakePayoutStructureSelect.value;
-            const entryFee = parseFloat(rakeEntryFeeInput.value);
-            const numPlayers = parseInt(rakeNumPlayersInput.value);
-            const rakePercent = parseFloat(rakePercentageInput.value);
-
+            const gameMode = DOM.rakeGameModeSelect.value;
+            const payoutStructure = DOM.rakePayoutStructureSelect.value;
+            const entryFee = parseFloat(DOM.rakeEntryFeeInput.value);
+            const numPlayers = parseInt(DOM.rakeNumPlayersInput.value);
+            const rakePercent = parseFloat(DOM.rakePercentageInput.value);
             let leaderboard = [];
 
             for (let i = 0; i < numPlayers; i++) {
                 const handicap = Math.floor(Math.random() * 31);
                 let bestScore = (gameMode === 'longest_drive') ? 0 : Infinity;
-
                 if (gameMode === 'longest_drive') {
                     const meanDrive = 280 - (handicap * 3.5);
                     const driveStdDev = 10 + (handicap * 0.5);
-                    for (let j = 0; j < 5; j++) {
-                        const drive = randomNormal(meanDrive, driveStdDev);
-                        if (drive > bestScore) bestScore = drive;
-                    }
-                } else { // Closest to the Pin
-                    const holeId = parseInt(rakeCtpHoleSelect.value);
-                    const hole = holeData.find(h => h.id === holeId);
-                    const dispersion = calculateInitialDispersion(handicap, hole.dist);
-                    for (let j = 0; j < 5; j++) {
-                        const miss = simulateShot(dispersion);
-                        if (miss < bestScore) bestScore = miss;
-                    }
+                    for (let j = 0; j < 5; j++) bestScore = Math.max(bestScore, Utils.randomNormal(meanDrive, driveStdDev));
+                } else {
+                    const hole = HOLE_DATA.find(h => h.id === parseInt(DOM.rakeCtpHoleSelect.value));
+                    const dispersion = Utils.calculateInitialDispersion(handicap, hole.dist);
+                    for (let j = 0; j < 5; j++) bestScore = Math.min(bestScore, Utils.simulateShot(dispersion));
                 }
                 leaderboard.push({ name: `Player ${i+1} (HCP ${handicap})`, score: bestScore });
             }
 
-            // Sort leaderboard based on game mode
-            if (gameMode === 'longest_drive') {
-                leaderboard.sort((a, b) => b.score - a.score);
-            } else {
-                leaderboard.sort((a, b) => a.score - b.score);
-            }
-            
+            leaderboard.sort((a, b) => (gameMode === 'longest_drive') ? b.score - a.score : a.score - b.score);
             const top10 = leaderboard.slice(0, 10);
-
             const totalPool = entryFee * numPlayers;
             const houseRake = totalPool * (rakePercent / 100);
             const prizePool = totalPool - houseRake;
 
-            // Payout Logic
-            let summaryHTML = `
-                <div class="flex justify-between text-sm text-gray-400">
-                    <span>Total Prize Pool:</span>
-                    <span class="font-semibold text-white">$${totalPool.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                </div>
-                <div class="flex justify-between text-sm text-gray-400">
-                    <span>House Rake (${rakePercent}%):</span>
-                    <span class="font-semibold text-white">$${houseRake.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                </div>
-            `;
+            let summaryHTML = `<div class="flex justify-between text-sm text-gray-400"><span>Total Prize Pool:</span><span class="font-semibold text-white">${Utils.formatCurrency(totalPool)}</span></div><div class="flex justify-between text-sm text-gray-400"><span>House Rake (${rakePercent}%):</span><span class="font-semibold text-white">${Utils.formatCurrency(houseRake)}</span></div>`;
+            if (payoutStructure === 'winner_takes_all') summaryHTML += `<div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-700"><span class="text-white">1st Place:</span><span class="text-[#9e8cb4]">${Utils.formatCurrency(prizePool)}</span></div>`;
+            else if (payoutStructure === 'top_2') summaryHTML += `<div class="border-t border-gray-700 mt-2 pt-2 space-y-1 text-sm"><div class="flex justify-between font-bold"><span class="text-white">1st (70%):</span><span class="text-[#9e8cb4]">${Utils.formatCurrency(prizePool * 0.7)}</span></div><div class="flex justify-between"><span class="text-gray-300">2nd (30%):</span><span class="text-gray-300">${Utils.formatCurrency(prizePool * 0.3)}</span></div></div>`;
+            else if (payoutStructure === 'top_3') summaryHTML += `<div class="border-t border-gray-700 mt-2 pt-2 space-y-1 text-sm"><div class="flex justify-between font-bold"><span class="text-white">1st (60%):</span><span class="text-[#9e8cb4]">${Utils.formatCurrency(prizePool * 0.6)}</span></div><div class="flex justify-between"><span class="text-gray-300">2nd (30%):</span><span class="text-gray-300">${Utils.formatCurrency(prizePool * 0.3)}</span></div><div class="flex justify-between"><span class="text-gray-300">3rd (10%):</span><span class="text-gray-300">${Utils.formatCurrency(prizePool * 0.1)}</span></div></div>`;
+            DOM.rakeFinancialSummaryEl.innerHTML = summaryHTML;
 
-            if (payoutStructure === 'winner_takes_all') {
-                summaryHTML += `<div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-700"><span class="text-white">1st Place Payout:</span><span class="text-[#9e8cb4]">$${prizePool.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>`;
-            } else if (payoutStructure === 'top_2') {
-                const first = prizePool * 0.7;
-                const second = prizePool * 0.3;
-                summaryHTML += `<div class="border-t border-gray-700 mt-2 pt-2 space-y-1 text-sm">
-                    <div class="flex justify-between font-bold"><span class="text-white">1st Place:</span><span class="text-[#9e8cb4]">$${first.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
-                    <div class="flex justify-between"><span class="text-gray-300">2nd Place:</span><span class="text-gray-300">$${second.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
-                </div>`;
-            } else if (payoutStructure === 'top_3') {
-                const first = prizePool * 0.6;
-                const second = prizePool * 0.3;
-                const third = prizePool * 0.1;
-                summaryHTML += `<div class="border-t border-gray-700 mt-2 pt-2 space-y-1 text-sm">
-                    <div class="flex justify-between font-bold"><span class="text-white">1st Place:</span><span class="text-[#9e8cb4]">$${first.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
-                    <div class="flex justify-between"><span class="text-gray-300">2nd Place:</span><span class="text-gray-300">$${second.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
-                    <div class="flex justify-between"><span class="text-gray-300">3rd Place:</span><span class="text-gray-300">$${third.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
-                </div>`;
-            }
-            rakeFinancialSummaryEl.innerHTML = summaryHTML;
-
-            rakeLeaderboardChartInstance.data.labels = top10.map(p => p.name).reverse();
-            rakeLeaderboardChartInstance.data.datasets[0].data = top10.map(p => p.score).reverse();
-            rakeLeaderboardChartInstance.options.scales.x.title.text = (gameMode === 'longest_drive') ? 'Longest Drive (yds)' : 'Closest to Pin (ft)';
-            rakeLeaderboardChartInstance.update();
-
-            runRakeSimBtn.disabled = false;
+            Charts.instances.rake.data.labels = top10.map(p => p.name).reverse();
+            Charts.instances.rake.data.datasets[0].data = top10.map(p => p.score).reverse();
+            Charts.instances.rake.options.scales.x.title.text = (gameMode === 'longest_drive') ? 'Longest Drive (yds)' : 'Closest to Pin (ft)';
+            Charts.instances.rake.update();
+            DOM.runRakeSimBtn.disabled = false;
         }
 
         function randomizeRakeCompetition() {
-            // Random Game Mode
-            const gameModes = rakeGameModeSelect.options;
-            rakeGameModeSelect.selectedIndex = Math.floor(Math.random() * gameModes.length);
-            
-            // Trigger change to show/hide CTP hole selector
-            rakeGameModeSelect.dispatchEvent(new Event('change'));
-
-            // Random Payout Structure
-            const payoutStructures = rakePayoutStructureSelect.options;
-            rakePayoutStructureSelect.selectedIndex = Math.floor(Math.random() * payoutStructures.length);
-
-            // Random Entry Fee ($5 to $50)
-            rakeEntryFeeInput.value = Math.floor(Math.random() * 46) + 5;
-
-            // Random CTP Hole if applicable
-            if (rakeGameModeSelect.value === 'closest_to_pin') {
-                const ctpOptions = rakeCtpHoleSelect.options;
-                rakeCtpHoleSelect.selectedIndex = Math.floor(Math.random() * ctpOptions.length);
+            DOM.rakeGameModeSelect.selectedIndex = Math.floor(Math.random() * DOM.rakeGameModeSelect.options.length);
+            DOM.rakeGameModeSelect.dispatchEvent(new Event('change'));
+            DOM.rakePayoutStructureSelect.selectedIndex = Math.floor(Math.random() * DOM.rakePayoutStructureSelect.options.length);
+            DOM.rakeEntryFeeInput.value = Math.floor(Math.random() * 46) + 5;
+            if (DOM.rakeGameModeSelect.value === 'closest_to_pin') {
+                DOM.rakeCtpHoleSelect.selectedIndex = Math.floor(Math.random() * DOM.rakeCtpHoleSelect.options.length);
             }
         }
 
-
-        function init() {
-            // Page Toggling
-            playerSimBtn.addEventListener('click', () => {
-                playerSimPage.classList.remove('hidden');
-                houseSimPage.classList.add('hidden');
-                rakeSimPage.classList.add('hidden');
-                playerSimBtn.classList.add('active');
-                houseSimBtn.classList.remove('active');
-                rakeSimBtn.classList.remove('active');
-            });
-            houseSimBtn.addEventListener('click', () => {
-                playerSimPage.classList.add('hidden');
-                houseSimPage.classList.remove('hidden');
-                rakeSimPage.classList.add('hidden');
-                playerSimBtn.classList.remove('active');
-                houseSimBtn.classList.add('active');
-                rakeSimBtn.classList.remove('active');
-            });
-             rakeSimBtn.addEventListener('click', () => {
-                playerSimPage.classList.add('hidden');
-                houseSimPage.classList.add('hidden');
-                rakeSimPage.classList.remove('hidden');
-                playerSimBtn.classList.remove('active');
-                houseSimBtn.classList.remove('active');
-                rakeSimBtn.classList.add('active');
-            });
-
-            // Player Sim Init
-            const hitBtn = document.getElementById('hit-ball-btn');
-            hitBtn.addEventListener('mouseover', () => hitBtn.style.backgroundColor = 'var(--brand-deep-purple)');
-            hitBtn.addEventListener('mouseout', () => hitBtn.style.backgroundColor = 'var(--brand-bright-purple)');
-
-            holeData.forEach(hole => {
-                const button = document.createElement('button');
-                button.className = 'hole-btn border border-gray-600 rounded-md p-2 text-xs text-gray-300 hover:bg-[#493b7c] hover:border-[#493b7c] transition';
-                button.textContent = `${hole.dist}y`;
-                button.dataset.holeId = hole.id;
-                if (hole.id === selectedHoleId) button.classList.add('active');
-                
-                button.addEventListener('click', () => {
-                    selectedHoleId = parseInt(button.dataset.holeId);
-                    lastShotData = null;
-                    document.querySelectorAll('.hole-btn').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    updateAllDisplays();
-                });
-                holeSelectionDiv.appendChild(button);
-            });
-            
-            handicapSlider.addEventListener('input', (e) => {
-                handicapValue.textContent = e.target.value;
-            });
-            handicapSlider.addEventListener('change', (e) => {
-                resetSkillModel();
-            });
-            
-            resetSkillBtn.addEventListener('click', resetSkillModel);
-            
-            resetSessionBtn.addEventListener('click', () => {
-                totalWagered = 0;
-                totalWon = 0;
-                updateTrackerUI();
-                saveState();
-            });
-
-            devModeToggle.addEventListener('change', () => {
-                devModeControls.classList.toggle('hidden');
-            });
-
-            hitBallBtn.addEventListener('click', handleSimulation);
-
-            initPayoutChart();
-            initPmaxHistoryChart();
-            loadState();
-            updateAllDisplays();
-
-            // House Sim Init
-            initHouseProfitChart();
-            initHeatmapChart();
-            runHouseSimBtn.addEventListener('click', runHouseSimulation);
-
-            // Rake Sim Init
-            holeData.forEach(hole => {
-                const option = document.createElement('option');
-                option.value = hole.id;
-                option.textContent = `${hole.dist} yds`;
-                rakeCtpHoleSelect.appendChild(option);
-            });
-            rakeGameModeSelect.addEventListener('change', (e) => {
-                if (e.target.value === 'closest_to_pin') {
-                    rakeCtpHoleContainer.classList.remove('hidden');
-                } else {
-                    rakeCtpHoleContainer.classList.add('hidden');
-                }
-            });
-            initRakeLeaderboardChart();
-            runRakeSimBtn.addEventListener('click', runRakeSimulation);
-            randomizeRakeBtn.addEventListener('click', randomizeRakeCompetition);
+        // --- DATA PERSISTENCE ---
+        function saveState() {
+            try {
+                localStorage.setItem('golfWagerPlayerState_v2', JSON.stringify(player));
+                localStorage.setItem('golfWagerTotalWagered_v2', totalWagered);
+                localStorage.setItem('golfWagerTotalWon_v2', totalWon);
+            } catch (e) { console.error("Could not save state:", e); }
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        function loadState() {
+            try {
+                const savedState = localStorage.getItem('golfWagerPlayerState_v2');
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+                    // Re-instantiate the class to ensure methods are available
+                    player = new Player(parsedState.handicap);
+                    player.kalmanFilters = parsedState.kalmanFilters;
+                    totalWagered = parseFloat(localStorage.getItem('golfWagerTotalWagered_v2')) || 0;
+                    totalWon = parseFloat(localStorage.getItem('golfWagerTotalWon_v2')) || 0;
+                } else {
+                    resetSkillModel();
+                }
+            } catch (e) {
+                console.error("Could not load state, resetting:", e);
+                resetSkillModel();
+            }
+        }
+
+        // --- APP INITIALIZATION ---
+        function main() {
+            Charts.init();
+            UI.init();
+            loadState();
+            UI.updateAllDisplays();
+        }
+
+        main();
+    });
     </script>
 </body>
 </html>
